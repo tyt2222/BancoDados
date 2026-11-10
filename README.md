@@ -5,15 +5,15 @@ Base futura para um mapa de desemprego (o join com o mapa do pais e pelo codigo_
 
 ## Ordem para rodar
 
-1. **Criar o schema** (uma vez, como SYS ou SYSTEM)
-   - `oracle/CreateBD_Oracle.sql` (as 4 primeiras linhas comentadas criam o usuario)
+1. **Criar o schema** (SYSTEM)
+   - oracle/CreateBD_Oracle.sql (Script de criar o usuario esta nas 4 primeiras linhas)
 
 2. **Conectar como IBGE_DESEMPREGO e rodar, nesta ordem:**
-   - `oracle/CreateBD_Oracle.sql` (tabelas e indices)
-   - `oracle/inserts/InsertPais_Oracle.sql`
-   - `oracle/inserts/InsertEstados_Oracle.sql`
-   - `oracle/inserts/InsertMunicipios_Oracle.sql` 
-   - `oracle/Views_IBGE.sql` 
-   - `oracle/Privilegios_IBGE.sql`
-   - `oracle/Procedimentos_IBGE.sql`
+   - oracle/CreateBD_Oracle.sql (tabelas e indices)
+   - oracle/inserts/InsertPais_Oracle.sql
+   - oracle/inserts/InsertEstados_Oracle.sql
+   - oracle/inserts/InsertMunicipios_Oracle.sql`
+   - oracle/Views_IBGE.sql
+   - oracle/Privilegios_IBGE.sql
+   - oracle/Procedimentos_IBGE.sql
 
