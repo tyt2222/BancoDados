@@ -1,0 +1,70 @@
+-- procedimentos e funcoes do ibge_desemprego
+
+SET SERVEROUTPUT ON
+
+-- procedure chamada pelo painel admin pra corrigir um municipio, o update e o registro na auditoria entram juntos ou a gente da rollback
+
+CREATE OR REPLACE PROCEDURE corrigir_municipio (
+    p_ibge Municipios.codigo_ibge%TYPE,
+    p_campo VARCHAR2,
+    p_novo NUMBER,
+    p_analista VARCHAR2
+) IS
+    v_id NUMBER;
+    v_antigo NUMBER;
+BEGIN
+
+    SELECT NVL(MAX(id_correcao), 0) + 1 INTO v_id FROM Correcoes;
+
+    IF p_campo = 'renda_media' THEN
+        SELECT renda_media INTO v_antigo
+        FROM Municipios WHERE codigo_ibge = p_ibge;
+
+        UPDATE Municipios SET renda_media = p_novo
+        WHERE codigo_ibge = p_ibge;
+
+    ELSIF p_campo = 'taxa_desemprego' THEN
+        SELECT taxa_desemprego INTO v_antigo
+        FROM Municipios WHERE codigo_ibge = p_ibge;
+
+        UPDATE Municipios SET taxa_desemprego = p_novo
+        WHERE codigo_ibge = p_ibge;
+
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Campo invalido: ' || p_campo);
+        RETURN;
+    END IF;
+
+    INSERT INTO Correcoes (id_correcao, codigo_ibge, campo, valor_antigo, valor_novo, analista, data_correcao)
+    VALUES (v_id, p_ibge, p_campo, v_antigo, p_novo, p_analista, SYSDATE);
+
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Correcao gravada em ' || SQL%ROWCOUNT || ' municipio.');
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Municipio ' || p_ibge || ' nao encontrado.');
+END;
+/
+
+-- function que conta quantos municipios do estado estao com desemprego acima da media do pais
+
+CREATE OR REPLACE FUNCTION fx_municipios_acima_media (
+    p_sigla Estados.sigla%TYPE
+) RETURN NUMBER IS
+    qtd NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO qtd
+    FROM Municipios
+    WHERE uf = p_sigla
+    AND taxa_desemprego > (SELECT AVG(taxa_desemprego) FROM Municipios);
+    RETURN qtd;
+END;
+/
+
+GRANT EXECUTE ON corrigir_municipio TO site_admin;
+GRANT EXECUTE ON fx_municipios_acima_media TO site_admin;
+
+-- DROP PROCEDURE corrigir_municipio;
+-- DROP FUNCTION fx_municipios_acima_media;

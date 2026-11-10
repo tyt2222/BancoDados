@@ -1,0 +1,5 @@
+﻿USE IBGE_DESEMPREGO;
+SELECT * FROM Pais;
+SELECT * FROM Estados;
+SELECT * FROM Municipios
+ORDER BY renda_media ASC;
