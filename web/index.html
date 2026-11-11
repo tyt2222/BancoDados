@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>IBGE_DESEMPREGO - painel de teste</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f2f4f7; color: #222; padding: 24px; }
+  .caixa { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: #667; font-size: 13px; margin-bottom: 16px; }
+  section { background: #fff; border: 1px solid #e1e5eb; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 15px; margin-bottom: 12px; }
+  .perfis { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .perfis label { display: flex; gap: 6px; align-items: center; padding: 8px 14px; border: 1px solid #ccd; border-radius: 8px; cursor: pointer; background: #fafbfc; font-size: 14px; }
+  .perfis label.ativo { background: #2b5cab; color: #fff; border-color: #2b5cab; }
+  #status { font-size: 13px; color: #556; margin-left: auto; }
+  .botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+  button { padding: 9px 16px; border: 1px solid #ccd; border-radius: 8px; background: #fff; cursor: pointer; font-size: 14px; }
+  button:hover { background: #eef3fb; border-color: #2b5cab; }
+  .tabela-wrap { max-height: 420px; overflow: auto; margin-top: 14px; border: 1px solid #e5e8ee; border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { position: sticky; top: 0; background: #f0f2f5; text-align: left; padding: 8px 10px; border-bottom: 2px solid #dde; white-space: nowrap; }
+  td { padding: 6px 10px; border-bottom: 1px solid #eef1f4; white-space: nowrap; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .campo { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  input, select { padding: 8px; border: 1px solid #ccd; border-radius: 6px; font-size: 14px; }
+  .linha-btn { grid-column: 1 / -1; margin-top: 4px; }
+  .aviso { font-size: 12px; color: #889; margin-top: 10px; }
+  #msg { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
+  .ok { background: #e7f6ec; color: #1c6b3a; }
+  .erro { background: #fdeaea; color: #a02; }
+  .info { background: #eef3fb; color: #2b5cab; }
+  code { background: #f0f2f5; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="caixa">
+
+  <h1>IBGE_DESEMPREGO — painel de teste</h1>
+  <div class="sub">Cada perfil conecta no Oracle com o proprio usuario, entao as permissoes do <code>Privilegios_IBGE.sql</code> valem de verdade</div>
+
+  <section>
+    <h2>Quem esta usando</h2>
+    <div class="perfis">
+      <label><input type="radio" name="perfil" value="dono"> dono (IBGE_DESEMPREGO)</label>
+      <label class="ativo"><input type="radio" name="perfil" value="mapa_app" checked> mapa_app (site)</label>
+      <label><input type="radio" name="perfil" value="site_admin"> site_admin (admin)</label>
+      <span id="status">conectando...</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Visualizar tabelas e views</h2>
+    <div class="botoes">
+      <button data-obj="PAIS">Pais</button>
+      <button data-obj="ESTADOS">Estados</button>
+      <button data-obj="MUNICIPIOS">Municipios</button>
+      <button data-obj="CORRECOES">Correcoes</button>
+      <button data-obj="VW_DESEMPREGO_MUNICIPIO">vw_desemprego_municipio</button>
+      <button data-obj="VW_DESEMPREGO_ESTADO">vw_desemprego_estado</button>
+      <button data-obj="VW_RANKING_DESEMPREGO">vw_ranking_desemprego</button>
+    </div>
+    <div class="tabela-wrap" id="saida"><div style="padding:20px;color:#889;font-size:13px">escolha uma tabela ou view ai em cima</div></div>
+  </section>
+
+  <section>
+    <h2>Testar a procedure corrigir_municipio</h2>
+    <form id="fcorrigir">
+      <div class="campo"><label>Codigo IBGE</label><input name="ibge" type="number" placeholder="2600054" required></div>
+      <div class="campo"><label>Campo</label>
+        <select name="campo">
+          <option value="renda_media">renda_media</option>
+          <option value="taxa_desemprego">taxa_desemprego</option>
+        </select>
+      </div>
+      <div class="campo"><label>Valor novo</label><input name="valor" type="number" step="0.01" placeholder="1550.00" required></div>
+      <div class="campo"><label>Analista</label><input name="analista" value="site_admin" required></div>
+      <div class="linha-btn"><button type="submit">Corrigir municipio</button></div>
+    </form>
+    <div class="aviso">Dica de demonstracao: envie essa correcao logado como <b>mapa_app</b> — o Oracle bloqueia (sem privilegio) e depois como <b>site_admin</b> — passa e grava na Correcoes.</div>
+    <div id="msg"></div>
+  </section>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let perfil = 'mapa_app';
+
+function msg(texto, classe) {
+  const m = $('#msg');
+  m.textContent = texto;
+  m.className = classe;
+  m.style.display = 'block';
+}
+
+async function post(url, dados) {
+  const r = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+  return r.json();
+}
+
+// troca de perfil, reconecta e mostra o usuario do oracle
+async function trocarPerfil(novo) {
+  perfil = novo;
+  $('#status').textContent = 'conectando...';
+  const r = await post('/api/testar', { perfil });
+  $('#status').textContent = r.usuario ? ('conectado como ' + r.usuario) : ('ERRO: ' + r.erro);
+  $('#status').style.color = r.usuario ? '#1c6b3a' : '#a02';
+}
+
+document.querySelectorAll('input[name=perfil]').forEach(r =>
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.perfis label').forEach(l => l.classList.remove('ativo'));
+    r.closest('label').classList.add('ativo');
+    trocarPerfil(r.value);
+  }));
+
+// botoes de visualizar
+document.querySelectorAll('button[data-obj]').forEach(b =>
+  b.addEventListener('click', async () => {
+    $('#saida').innerHTML = '<div style="padding:20px;color:#889;font-size:13px">carregando ' + b.textContent + '...</div>';
+    const r = await post('/api/listar', { perfil, objeto: b.dataset.obj });
+    if (r.erro) {
+      $('#saida').innerHTML = '<div style="padding:20px;color:#a02;font-size:13px">Oracle bloqueou: <b>' + r.erro + '</b>' +
+        (r.codigo ? ' (ORA-' + r.codigo + ')' : '') +
+        '<br>ou seja, esse perfil nao tem permissao nisso</div>';
+      return;
+    }
+    let html = '<table><thead><tr>' + r.colunas.map(c => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>';
+    for (const linha of r.linhas) html += '<tr>' + linha.map(v => '<td>' + (v === null ? '—' : v) + '</td>').join('') + '</tr>';
+    html += '</tbody></table>';
+    $('#saida').innerHTML = html + '<div style="padding:8px 12px;color:#889;font-size:12px">' + r.linhas.length + ' linha(s) exibidas (limite 200) — conectado como ' + r.usuario + '</div>';
+  }));
+
+// formulario da procedure
+$('#fcorrigir').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const f = ev.target;
+  const r = await post('/api/corrigir', {
+    perfil, ibge: f.ibge.value, campo: f.campo.value, valor: f.valor.value, analista: f.analista.value
+  });
+  if (r.erro) msg('Falhou: ' + r.erro + (r.codigo ? ' (ORA-' + r.codigo + ')' : ''), 'erro');
+  else {
+    msg('Correcao gravada! O municipio ' + f.ibge.value + ' foi atualizado e o registro entrou na tabela Correcoes.', 'ok');
+    f.reset();
+    f.analista.value = 'site_admin';
+  }
+});
+
+trocarPerfil(perfil);
+</script>
+</body>
+</html>

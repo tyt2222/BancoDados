@@ -1,0 +1,11 @@
+{
+  "name": "painel-ibge-desemprego",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "oracledb": "^6.0.0"
+  }
+}
