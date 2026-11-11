@@ -17,4 +17,4 @@ Base futura para um mapa de desemprego (o join com o mapa do pais e pelo codigo_
 
 ## Reset do banco (caso queira recomeçar do zero)
 
-- oracle/Reset_Oracle.sql — Executar como SYSTEM (no serviço do PDB, ex: `XEPDB1`)
+- oracle/Reset_Oracle.sql — Executar como SYSTEM (MUDAR PDB)
