@@ -12,7 +12,7 @@ const DB_CONNECT = 'localhost:1521/XEPDB1'; // host:porta/servico do oracle de l
 
 // senhas dos perfis, iguais as do Privilegios_IBGE.sql
 const PERFIS = {
-    dono:       { user: 'IBGE_DESEMPREGO', password: 'TROQUE_A_SENHA' },
+    dono:       { user: 'IBGE_DESEMPREGO', password: 'senha123' },
     mapa_app:   { user: 'mapa_app',        password: 'mapa123' },
     site_admin: { user: 'site_admin',      password: 'admin123' }
 };

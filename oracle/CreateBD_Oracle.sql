@@ -1,9 +1,4 @@
-﻿-- banco IBGE_DESEMPREGO 
--- se o schema ainda nao existe, roda uma vez como SYS ou SYSTEM:
--- CREATE USER IBGE_DESEMPREGO IDENTIFIED BY sua_senha QUOTA UNLIMITED ON USERS;
--- GRANT CREATE SESSION, CREATE TABLE TO IBGE_DESEMPREGO;
-
-DROP TABLE IF EXISTS Correcoes;
+﻿DROP TABLE IF EXISTS Correcoes;
 DROP TABLE IF EXISTS Municipios;
 DROP TABLE IF EXISTS Estados;
 DROP TABLE IF EXISTS Pais;
@@ -48,7 +43,6 @@ CREATE TABLE Municipios (
     CHECK (taxa_desemprego BETWEEN 0 AND 100)
 );
 
--- auditoria das correcoes do admin
 CREATE TABLE Correcoes (
     id_correcao NUMBER(8) PRIMARY KEY,
     codigo_ibge NUMBER(7) NOT NULL,
@@ -62,7 +56,6 @@ CREATE TABLE Correcoes (
     CHECK (campo IN ('renda_media', 'taxa_desemprego', 'populacao'))
 );
 
--- indices que ajudam na hora de montar o mapa
 CREATE INDEX idx_municipio_uf ON Municipios(uf);
 CREATE INDEX idx_municipio_taxa ON Municipios(taxa_desemprego);
 CREATE INDEX idx_estado_regiao ON Estados(regiao);

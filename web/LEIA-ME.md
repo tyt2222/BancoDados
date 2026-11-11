@@ -39,6 +39,5 @@ Nao precisa do Oracle Client na maquina — o driver oracledb roda em modo thin.
 
 ## Senhas dos perfis
 
-Iguais as do `Privilegios_IBGE.sql`: `mapa_app` = mapa123, `site_admin` = admin123.
-Na faculdade, rode o `Privilegios_IBGE.sql` e o `Procedimentos_IBGE.sql` no banco
-de la antes de usar o painel.
+Definidas no `CriarUsuarios_SYSTEM.sql`: `IBGE_DESEMPREGO` = senha123, `mapa_app` = mapa123, `site_admin` = admin123.
+Na faculdade, rode o `CriarUsuarios_SYSTEM.sql` (como SYSTEM no serviço XEPDB1) e os scripts do schema antes de usar o painel.

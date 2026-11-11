@@ -1,8 +1,4 @@
--- procedimentos e funcoes do ibge_desemprego
-
-SET SERVEROUTPUT ON
-
--- procedure chamada pelo painel admin pra corrigir um municipio, o update e o registro na auditoria entram juntos ou a gente da rollback
+SET SERVEROUTPUT ON;
 
 CREATE OR REPLACE PROCEDURE corrigir_municipio (
     p_ibge Municipios.codigo_ibge%TYPE,
@@ -48,8 +44,6 @@ EXCEPTION
 END;
 /
 
--- function que conta quantos municipios do estado estao com desemprego acima da media do pais
-
 CREATE OR REPLACE FUNCTION fx_municipios_acima_media (
     p_sigla Estados.sigla%TYPE
 ) RETURN NUMBER IS
@@ -62,9 +56,3 @@ BEGIN
     RETURN qtd;
 END;
 /
-
-GRANT EXECUTE ON corrigir_municipio TO site_admin;
-GRANT EXECUTE ON fx_municipios_acima_media TO site_admin;
-
--- DROP PROCEDURE corrigir_municipio;
--- DROP FUNCTION fx_municipios_acima_media;
