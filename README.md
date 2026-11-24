@@ -4,24 +4,8 @@ Banco de dados relacional contendo dados socioeconômicos dos estados e municíp
 
 Base ideal para consultas analíticas, cruzamentos estatísticos e integração com malhas cartográficas (joins via `codigo_ibge` e `sigla`).
 
----
 
-## 📊 Estrutura das Tabelas
-
-| Tabela | Qtd Registros | Descrição | Relacionamentos / Chaves |
-| :--- | :---: | :--- | :--- |
-| **`Pais`** | 1 | Dados agregados consolidados do Brasil | `PK: id_pais` |
-| **`Regioes`** | 5 | As 5 macro-regiões (Norte, Nordeste, Sudeste, Sul, Centro-Oeste) com áreas oficiais em km² e total de estados | `PK: id_regiao`, `UNIQUE: sigla, nome` |
-| **`Analistas`** | 5 | Equipe técnica responsável pelas correções e auditorias estatísticas | `PK: id_analista`, `UNIQUE: email` |
-| **`Estados`** | 27 | As 27 Unidades Federativas do Brasil com população, renda média e desemprego | `PK: id_estado`, `FK: id_pais, id_regiao`, `UNIQUE: sigla` |
-| **`Municipios`** | 5.570 | Todos os municípios do Brasil com código IBGE oficial, população e indicadores | `PK: id_municipio`, `FK: id_estado`, `UNIQUE: codigo_ibge` |
-| **`Correcoes`** | Variável | Tabela de auditoria para rastrear alterações manuais efetuadas em municípios | `PK: id_correcao`, `FK: codigo_ibge, id_analista` |
-| **`Indicadores_Sociais`** | 27 | Indicadores consolidados por UF: IDHM, taxa de analfabetismo, ensino superior, % de pobreza e Índice de Gini | `PK: id_indicador`, `FK UNIQUE: id_estado` |
-| **`Historico_Desemprego`** | 108 | Série temporal anual (2021 a 2024) da taxa de desemprego e renda média de cada estado | `PK: id_historico`, `FK: id_estado`, `UNIQUE(id_estado, ano)` |
-
----
-
-## 🚀 Ordem de Execução dos Scripts
+## Ordem de Execução dos Scripts
 
 ### Oracle Database
 
@@ -53,14 +37,14 @@ Base ideal para consultas analíticas, cruzamentos estatísticos e integração 
 
 ---
 
-## 🔄 Reset do Banco (Oracle)
+## Reset do Banco (Oracle)
 
 Caso deseje recomeçar a estrutura do zero:
 - `oracle/Reset_Oracle.sql` — Executar conectado como `SYSTEM` (ajuste o serviço/PDB se necessário).
 
 ---
 
-## 🌐 Painel Web de Demonstração
+## Painel Web de Demonstração
 
 O projeto conta com um painel web em Node.js (`web/server.js` e `web/index.html`) para demonstração das tabelas, views e permissões de usuários (dono, `mapa_app` e `site_admin`).
 
