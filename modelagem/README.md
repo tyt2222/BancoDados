@@ -8,19 +8,29 @@ Esta pasta contém os diagramas conceituais e relacionais atualizados do projeto
 
 1. **`modelo_entidade_relacionamento.png` (MER Conceitual)**
    * Diagrama Conceitual Entidade-Relacionamento.
-   * Apresenta as entidades (`Pais`, `Regioes`, `Estados`, `Municipios`, `Analistas`, `Auditoria`, `Indicadores_Sociais`, `Historico_Desemprego`), seus relacionamentos e cardinalidades `(min, max)`.
+   * Apresenta as 8 entidades (`Pais`, `Regioes`, `Estados`, `Municipios`, `Analistas`, `Auditoria`, `Indicadores_Sociais`, `Historico_Desemprego`), os losangos de relacionamento com verbos de ligação, badges de cardinalidade macro (`1:N`, `1:1`) e cardinalidades mínimas/máximas `(min, max)`.
 
 2. **`modelo_relacional.png` (Modelo Lógico Relacional / DER)**
-   * Diagrama Lógico Relacional com todas as tabelas, colunas, tipos de dados Oracle/SQL, chaves primárias (PK), chaves estrangeiras (FK), constraints de unicidade (UQ) e as ligações de integridade referencial entre elas.
+   * Diagrama Lógico Relacional com todas as tabelas, colunas, tipos de dados Oracle/SQL, chaves primárias (PK), chaves estrangeiras (FK), constraints de unicidade (UQ) e as ligações de integridade referencial com badges indicando cardinalidade `1:N` e `1:1`.
 
 ---
 
-## 🔗 Resumo dos Relacionamentos
+## 🔗 Resumo das Cardinalidades
 
-* **Regioes (1,1) ── (1,N) Estados**: Cada estado pertence obrigatoriamente a uma macro-região; cada região agrupa 1 ou mais estados (`Estados.id_regiao -> Regioes.id_regiao`).
-* **Pais (1,1) ── (1,N) Estados**: Cada estado pertence a um país nacional (`Estados.id_pais -> Pais.id_pais`).
-* **Estados (1,1) ── (1,N) Municipios**: Cada município pertence a um único estado (`Municipios.id_estado -> Estados.id_estado`).
-* **Estados (1,1) ── (1,1) Indicadores_Sociais**: Cada estado possui exatamente um registro consolidado de indicadores sociais (`Indicadores_Sociais.id_estado -> Estados.id_estado`, UNIQUE).
-* **Estados (1,1) ── (1,N) Historico_Desemprego**: Cada estado registra uma série temporal anual de desemprego e rendimento (`Historico_Desemprego.id_estado -> Estados.id_estado`).
-* **Municipios (1,1) ── (0,N) Auditoria**: Cada município pode ter zero ou múltiplos registros de alterações manuais auditadas (`Auditoria.codigo_ibge -> Municipios.codigo_ibge`).
-* **Analistas (1,1) ── (0,N) Auditoria**: Cada analista pode registrar zero ou múltiplas correções auditadas no sistema (`Auditoria.id_analista -> Analistas.id_analista`).
+| Entidade Origem (1) | Relação | Cardinalidade | Entidade Destino (N / 1) | Chave Estrangeira (FK) |
+| :--- | :---: | :---: | :--- | :--- |
+| **Pais** | Abriga | **1:N** | **Estados** | `Estados.id_pais` ──> `Pais.id_pais` |
+| **Regioes** | Agrupa | **1:N** | **Estados** | `Estados.id_regiao` ──> `Regioes.id_regiao` |
+| **Estados** | Contém | **1:N** | **Municipios** | `Municipios.id_estado` ──> `Estados.id_estado` |
+| **Estados** | Possui | **1:1** | **Indicadores_Sociais** | `Indicadores_Sociais.id_estado` ──> `Estados.id_estado` (`UNIQUE`) |
+| **Estados** | Registra | **1:N** | **Historico_Desemprego** | `Historico_Desemprego.id_estado` ──> `Estados.id_estado` |
+| **Municipios** | Auditado em | **1:N** | **Auditoria** | `Auditoria.codigo_ibge` ──> `Municipios.codigo_ibge` |
+| **Analistas** | Efetua | **1:N** | **Auditoria** | `Auditoria.id_analista` ──> `Analistas.id_analista` |
+
+### Detalhamento das Notações
+* **1:N (Um para Muitos)**: Uma única ocorrência da entidade do lado 1 pode se associar a várias ocorrências da entidade do lado N (ex.: 1 estado tem N municípios).
+* **1:1 (Um para Um)**: Relação exclusiva e unívoca mantida por restrição `UNIQUE` na chave estrangeira (ex.: cada estado tem exatamente 1 registro de indicadores sociais consolidados).
+* **(min, max)**:
+  * `(1,1)`: Participação obrigatória unívoca.
+  * `(1,n)`: Participação obrigatória múltipla (pelo menos 1).
+  * `(0,n)`: Participação opcional múltipla (pode haver zero ou várias ocorrências, como as auditorias).

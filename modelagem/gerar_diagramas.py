@@ -31,7 +31,7 @@ def draw_diamond(draw, cx, cy, w, h, fill, outline, width=2):
 # 1. MODELO ENTIDADE-RELACIONAMENTO (MER)
 # ==========================================
 def generate_mer():
-    W, H = 2600, 1800
+    W, H = 2600, 1850
     img = Image.new("RGB", (W, H), "#F8FAFC")
     draw = ImageDraw.Draw(img)
 
@@ -40,15 +40,18 @@ def generate_mer():
     f_ent_title = get_font("segoeuib.ttf", 20)
     f_ent_attr = get_font("segoeui.ttf", 15)
     f_rel = get_font("segoeuib.ttf", 15)
+    f_badge = get_font("segoeuib.ttf", 15)
     f_card = get_font("segoeuib.ttf", 16)
+    f_card_macro = get_font("segoeuib.ttf", 22)
     f_leg = get_font("segoeui.ttf", 16)
+    f_leg_b = get_font("segoeuib.ttf", 16)
 
     # Header
     draw_rounded_rect(draw, (50, 40, W - 50, 130), 12, fill="#1E293B")
     draw.text((80, 55), "MODELO ENTIDADE-RELACIONAMENTO (MER) — ESQUEMA CONCEITUAL", font=f_title, fill="#FFFFFF")
-    draw.text((80, 98), "Projeto: IBGE_DESEMPREGO | Entidades, Relacionamentos e Cardinalidades Oficiais", font=f_sub, fill="#94A3B8")
+    draw.text((80, 98), "Projeto: IBGE_DESEMPREGO | Notação com Cardinalidades Estruturais (1:1, 1:N) e Min-Max (min, max)", font=f_sub, fill="#94A3B8")
 
-    # Entities Data: (name, attrs, (x, y, w, h), color_header)
+    # Entities Data
     entities = {
         "PAIS": {
             "title": "PAIS",
@@ -71,13 +74,13 @@ def generate_mer():
         "INDICADORES_SOCIAIS": {
             "title": "INDICADORES_SOCIAIS",
             "attrs": ["(PK) id_indicador", "idhm", "pct_pobreza", "indice_gini"],
-            "rect": (480, 940, 800, 1150),
+            "rect": (480, 960, 800, 1170),
             "header_color": "#7C3AED"
         },
         "HISTORICO_DESEMPREGO": {
             "title": "HISTORICO_DESEMPREGO",
             "attrs": ["(PK) id_historico", "ano", "taxa_desemprego", "renda_media"],
-            "rect": (860, 940, 1180, 1150),
+            "rect": (860, 960, 1180, 1170),
             "header_color": "#7C3AED"
         },
         "MUNICIPIOS": {
@@ -100,15 +103,15 @@ def generate_mer():
         }
     }
 
-    # Relationships: (name, (cx, cy), ent1, card1, ent2, card2)
+    # Relationships with macro type (1:N, 1:1) and min-max
     relations = [
-        {"name": "ABRIGA", "pos": (500, 310), "e1": "PAIS", "c1": "(1,1)", "e2": "ESTADOS", "c2": "(1,n)"},
-        {"name": "AGRUPA", "pos": (500, 600), "e1": "REGIOES", "c1": "(1,1)", "e2": "ESTADOS", "c2": "(1,n)"},
-        {"name": "POSSUI", "pos": (670, 820), "e1": "ESTADOS", "c1": "(1,1)", "e2": "INDICADORES_SOCIAIS", "c2": "(1,1)"},
-        {"name": "REGISTRA", "pos": (920, 820), "e1": "ESTADOS", "c1": "(1,1)", "e2": "HISTORICO_DESEMPREGO", "c2": "(1,n)"},
-        {"name": "CONTÉM", "pos": (1180, 585), "e1": "ESTADOS", "c1": "(1,1)", "e2": "MUNICIPIOS", "c2": "(1,n)"},
-        {"name": "AUDITADO_EM", "pos": (1835, 600), "e1": "MUNICIPIOS", "c1": "(1,1)", "e2": "AUDITORIA", "c2": "(0,n)"},
-        {"name": "REGISTRA", "pos": (2125, 560), "e1": "ANALISTAS", "c1": "(1,1)", "e2": "AUDITORIA", "c2": "(0,n)"}
+        {"name": "ABRIGA", "macro": "1:N", "pos": (500, 310), "e1": "PAIS", "m1": "1", "c1": "(1,1)", "e2": "ESTADOS", "m2": "N", "c2": "(1,n)"},
+        {"name": "AGRUPA", "macro": "1:N", "pos": (500, 600), "e1": "REGIOES", "m1": "1", "c1": "(1,1)", "e2": "ESTADOS", "m2": "N", "c2": "(1,n)"},
+        {"name": "POSSUI", "macro": "1:1", "pos": (670, 835), "e1": "ESTADOS", "m1": "1", "c1": "(1,1)", "e2": "INDICADORES_SOCIAIS", "m2": "1", "c2": "(1,1)"},
+        {"name": "REGISTRA", "macro": "1:N", "pos": (920, 835), "e1": "ESTADOS", "m1": "1", "c1": "(1,1)", "e2": "HISTORICO_DESEMPREGO", "m2": "N", "c2": "(1,n)"},
+        {"name": "CONTÉM", "macro": "1:N", "pos": (1180, 585), "e1": "ESTADOS", "m1": "1", "c1": "(1,1)", "e2": "MUNICIPIOS", "m2": "N", "c2": "(1,n)"},
+        {"name": "AUDITADO_EM", "macro": "1:N", "pos": (1835, 600), "e1": "MUNICIPIOS", "m1": "1", "c1": "(1,1)", "e2": "AUDITORIA", "m2": "N", "c2": "(0,n)"},
+        {"name": "EFETUA", "macro": "1:N", "pos": (2125, 560), "e1": "ANALISTAS", "m1": "1", "c1": "(1,1)", "e2": "AUDITORIA", "m2": "N", "c2": "(0,n)"}
     ]
 
     # Draw Relations & Connecting Lines First
@@ -119,28 +122,36 @@ def generate_mer():
         c1_pt = ((e1[0] + e1[2])//2, (e1[1] + e1[3])//2)
         c2_pt = ((e2[0] + e2[2])//2, (e2[1] + e2[3])//2)
 
-        # Draw line from e1 center to diamond center
+        # Connection lines
         draw.line([c1_pt, (cx, cy)], fill="#64748B", width=3)
         draw.line([(cx, cy), c2_pt], fill="#64748B", width=3)
 
-        # Diamond
-        rw, rh = 130, 60
+        # Diamond (Losango do Relacionamento)
+        rw, rh = 140, 64
         draw_diamond(draw, cx, cy, rw, rh, fill="#FFFFFF", outline="#0284C7", width=2)
         tw = draw.textlength(r["name"], font=f_rel)
         draw.text((cx - tw//2, cy - 9), r["name"], font=f_rel, fill="#0F172A")
 
-        # Cardinalities
-        # Midpoint of (c1_pt, (cx, cy))
+        # Macro Badge (ex: 1:N ou 1:1) right above diamond
+        badge_text = f"  {r['macro']}  "
+        bw = draw.textlength(badge_text, font=f_badge) + 12
+        badge_bg = "#2563EB" if r["macro"] == "1:N" else "#7C3AED"
+        draw_rounded_rect(draw, (cx - bw//2, cy - rh//2 - 26, cx + bw//2, cy - rh//2 - 2), 6, fill=badge_bg, outline="#1E293B", width=1)
+        draw.text((cx - bw//2 + 6, cy - rh//2 - 24), badge_text, font=f_badge, fill="#FFFFFF")
+
+        # Cardinalities Points
         m1x = (c1_pt[0] * 3 + cx) // 4
         m1y = (c1_pt[1] * 3 + cy) // 4
         m2x = (c2_pt[0] * 3 + cx) // 4
         m2y = (c2_pt[1] * 3 + cy) // 4
 
-        draw_rounded_rect(draw, (m1x - 24, m1y - 14, m1x + 24, m1y + 14), 4, fill="#F1F5F9", outline="#CBD5E1")
-        draw.text((m1x - 17, m1y - 11), r["c1"], font=f_card, fill="#0F172A")
+        # Near e1: Macro '1' or 'N' and Min-Max '(1,1)'
+        draw_rounded_rect(draw, (m1x - 30, m1y - 15, m1x + 30, m1y + 15), 5, fill="#F1F5F9", outline="#94A3B8")
+        draw.text((m1x - 24, m1y - 12), f"{r['m1']} {r['c1']}", font=f_card, fill="#0F172A")
 
-        draw_rounded_rect(draw, (m2x - 24, m2y - 14, m2x + 24, m2y + 14), 4, fill="#F1F5F9", outline="#CBD5E1")
-        draw.text((m2x - 17, m2y - 11), r["c2"], font=f_card, fill="#0F172A")
+        # Near e2: Macro '1' or 'N' and Min-Max
+        draw_rounded_rect(draw, (m2x - 30, m2y - 15, m2x + 30, m2y + 15), 5, fill="#F1F5F9", outline="#94A3B8")
+        draw.text((m2x - 24, m2y - 12), f"{r['m2']} {r['c2']}", font=f_card, fill="#0F172A")
 
     # Draw Entities Boxes
     for k, e in entities.items():
@@ -173,28 +184,44 @@ def generate_mer():
             cur_y += 24
 
     # Legend & Notes at bottom
-    leg_x0, leg_y0, leg_x1, leg_y1 = 80, 1540, W - 80, 1720
+    leg_x0, leg_y0, leg_x1, leg_y1 = 80, 1550, W - 80, 1780
     draw_rounded_rect(draw, (leg_x0, leg_y0, leg_x1, leg_y1), 10, fill="#FFFFFF", outline="#CBD5E1", width=2)
-    draw.text((leg_x0 + 30, leg_y0 + 20), "LEGENDA DO MER CONCEITUAL:", font=get_font("segoeuib.ttf", 18), fill="#1E293B")
+    draw.text((leg_x0 + 30, leg_y0 + 20), "LEGENDA DE CARDINALIDADES E NOTAÇÕES:", font=get_font("segoeuib.ttf", 19), fill="#1E293B")
 
-    # Legend items
-    draw.rectangle([leg_x0 + 30, leg_y0 + 55, leg_x0 + 50, leg_y0 + 75], fill="#1E40AF")
-    draw.text((leg_x0 + 60, leg_y0 + 55), "Entidade Forte", font=f_leg, fill="#334155")
+    # Row 1: Macro Cardinalities
+    draw_rounded_rect(draw, (leg_x0 + 30, leg_y0 + 60, leg_x0 + 85, leg_y0 + 88), 6, fill="#2563EB")
+    draw.text((leg_x0 + 40, leg_y0 + 63), "1:N", font=f_badge, fill="#FFFFFF")
+    draw.text((leg_x0 + 95, leg_y0 + 63), "Um para Muitos (1 entidade se relaciona com várias)", font=f_leg, fill="#334155")
 
-    draw_diamond(draw, leg_x0 + 260, leg_y0 + 65, 30, 20, fill="#FFFFFF", outline="#0284C7", width=2)
-    draw.text((leg_x0 + 285, leg_y0 + 55), "Relacionamento (com verbo de ligação)", font=f_leg, fill="#334155")
+    draw_rounded_rect(draw, (leg_x0 + 570, leg_y0 + 60, leg_x0 + 625, leg_y0 + 88), 6, fill="#7C3AED")
+    draw.text((leg_x0 + 580, leg_y0 + 63), "1:1", font=f_badge, fill="#FFFFFF")
+    draw.text((leg_x0 + 635, leg_y0 + 63), "Um para Um (exclusivo, cada estado possui 1 registro de indicadores)", font=f_leg, fill="#334155")
 
-    draw_rounded_rect(draw, (leg_x0 + 640, leg_y0 + 53, leg_x0 + 710, leg_y0 + 77), 4, fill="#F1F5F9", outline="#CBD5E1")
-    draw.text((leg_x0 + 650, leg_y0 + 56), "(1,n)", font=f_card, fill="#0F172A")
-    draw.text((leg_x0 + 725, leg_y0 + 55), "Cardinalidade Mínima e Máxima (min, max)", font=f_leg, fill="#334155")
+    draw_rounded_rect(draw, (leg_x0 + 1280, leg_y0 + 60, leg_x0 + 1340, leg_y0 + 88), 6, fill="#64748B")
+    draw.text((leg_x0 + 1290, leg_y0 + 63), "N:N", font=f_badge, fill="#FFFFFF")
+    draw.text((leg_x0 + 1350, leg_y0 + 63), "Muitos para Muitos (normalizado no projeto através de tabelas associativas/FKs)", font=f_leg, fill="#334155")
 
-    draw.ellipse((leg_x0 + 30, leg_y0 + 105, leg_x0 + 42, leg_y0 + 117), fill="#B45309")
-    draw.text((leg_x0 + 55, leg_y0 + 102), "(PK) Identificador Principal / Chave", font=f_leg, fill="#334155")
+    # Row 2: Min-Max and Badges
+    draw_rounded_rect(draw, (leg_x0 + 30, leg_y0 + 115, leg_x0 + 110, leg_y0 + 143), 5, fill="#F1F5F9", outline="#94A3B8")
+    draw.text((leg_x0 + 36, leg_y0 + 118), "1 (1,1)", font=f_card, fill="#0F172A")
+    draw.text((leg_x0 + 120, leg_y0 + 119), "Obrigatório unívoco (mínimo 1, máximo 1)", font=f_leg, fill="#334155")
 
-    draw.ellipse((leg_x0 + 370, leg_y0 + 105, leg_x0 + 382, leg_y0 + 117), fill="#4338CA")
-    draw.text((leg_x0 + 395, leg_y0 + 102), "(UQ) Identificador Alternativo / Chave Única", font=f_leg, fill="#334155")
+    draw_rounded_rect(draw, (leg_x0 + 570, leg_y0 + 115, leg_x0 + 650, leg_y0 + 143), 5, fill="#F1F5F9", outline="#94A3B8")
+    draw.text((leg_x0 + 576, leg_y0 + 118), "N (1,n)", font=f_card, fill="#0F172A")
+    draw.text((leg_x0 + 660, leg_y0 + 119), "Obrigatório múltiplo (mínimo 1, máximo n)", font=f_leg, fill="#334155")
 
-    draw.text((leg_x0 + 820, leg_y0 + 102), "Total: 8 Entidades integradas ao esquema base do projeto IBGE_DESEMPREGO", font=get_font("segoeuib.ttf", 16), fill="#059669")
+    draw_rounded_rect(draw, (leg_x0 + 1100, leg_y0 + 115, leg_x0 + 1180, leg_y0 + 143), 5, fill="#F1F5F9", outline="#94A3B8")
+    draw.text((leg_x0 + 1106, leg_y0 + 118), "N (0,n)", font=f_card, fill="#0F172A")
+    draw.text((leg_x0 + 1190, leg_y0 + 119), "Opcional múltiplo (mínimo 0, máximo n - auditoria)", font=f_leg, fill="#334155")
+
+    # Row 3: PK & UQ
+    draw.ellipse((leg_x0 + 30, leg_y0 + 175, leg_x0 + 42, leg_y0 + 187), fill="#B45309")
+    draw.text((leg_x0 + 52, leg_y0 + 172), "(PK) Chave Primária", font=f_leg_b, fill="#B45309")
+
+    draw.ellipse((leg_x0 + 260, leg_y0 + 175, leg_x0 + 272, leg_y0 + 187), fill="#4338CA")
+    draw.text((leg_x0 + 282, leg_y0 + 172), "(UQ) Chave Alternativa Única", font=f_leg_b, fill="#4338CA")
+
+    draw.text((leg_x0 + 650, leg_y0 + 172), "Esquema conceitual completo integrando as 8 entidades do banco IBGE_DESEMPREGO", font=get_font("segoeuib.ttf", 16), fill="#059669")
 
     out_path = "modelagem/modelo_entidade_relacionamento.png"
     img.save(out_path, dpi=(300, 300))
@@ -204,7 +231,7 @@ def generate_mer():
 # 2. MODELO RELACIONAL (DER / ESQUEMA LÓGICO)
 # ==========================================
 def generate_relacional():
-    W, H = 2800, 1900
+    W, H = 2800, 1950
     img = Image.new("RGB", (W, H), "#F8FAFC")
     draw = ImageDraw.Draw(img)
 
@@ -215,14 +242,15 @@ def generate_relacional():
     f_col_b = get_font("segoeuib.ttf", 14)
     f_type = get_font("consola.ttf", 13)
     f_tag = get_font("segoeuib.ttf", 11)
+    f_card_pill = get_font("segoeuib.ttf", 14)
     f_leg = get_font("segoeui.ttf", 16)
 
     # Header
     draw_rounded_rect(draw, (50, 40, W - 50, 130), 12, fill="#0F172A")
-    draw.text((80, 55), "MODELO RELACIONAL — ESQUEMA LÓGICO / FÍSICO INTEGRADO", font=f_title, fill="#FFFFFF")
-    draw.text((80, 98), "Tabelas, Colunas, Tipos de Dados, Chaves Primárias (PK), Estrangeiras (FK) e Unicidades (UQ)", font=f_sub, fill="#94A3B8")
+    draw.text((80, 55), "MODELO RELACIONAL — ESQUEMA LÓGICO / FÍSICO COM CARDINALIDADES (1:1, 1:N)", font=f_title, fill="#FFFFFF")
+    draw.text((80, 98), "Tabelas, Colunas, Tipos de Dados, Chaves Primárias (PK), Estrangeiras (FK) e Cardinalidades Relacionais", font=f_sub, fill="#94A3B8")
 
-    # Tables specification: (name, cols=[(name, type, tag)], pos=(x, y, w, h), header_color)
+    # Tables specification
     tables = {
         "Pais": {
             "title": "Pais",
@@ -273,7 +301,7 @@ def generate_relacional():
                 ("pct_pobreza", "NUMBER(5,2)", None),
                 ("indice_gini", "NUMBER(4,3)", None),
             ],
-            "rect": (480, 920, 880, 1140),
+            "rect": (480, 940, 880, 1160),
             "color": "#7C3AED"
         },
         "Historico_Desemprego": {
@@ -285,7 +313,7 @@ def generate_relacional():
                 ("taxa_desemprego", "NUMBER(5,2)", None),
                 ("renda_media", "NUMBER(12,2)", None),
             ],
-            "rect": (960, 920, 1370, 1140),
+            "rect": (960, 940, 1370, 1160),
             "color": "#7C3AED"
         },
         "Municipios": {
@@ -333,22 +361,22 @@ def generate_relacional():
         }
     }
 
-    # Foreign Key Connectors: (from_tbl, from_col_idx, to_tbl, to_col_idx, label)
+    # Foreign Key Connectors with Cardinality Badges (1:N or 1:1)
     fk_links = [
         # Estados.id_pais -> Pais.id_pais
-        {"from": (660, 380), "to": (440, 240), "color": "#2563EB", "name": "FK: id_pais"},
+        {"from": (660, 380), "to": (440, 240), "color": "#2563EB", "card": "1:N", "pk_label": "1", "fk_label": "N"},
         # Estados.id_regiao -> Regioes.id_regiao
-        {"from": (660, 410), "to": (440, 530), "color": "#2563EB", "name": "FK: id_regiao"},
+        {"from": (660, 410), "to": (440, 530), "color": "#2563EB", "card": "1:N", "pk_label": "1", "fk_label": "N"},
         # Municipios.id_estado -> Estados.id_estado
-        {"from": (1480, 380), "to": (1060, 350), "color": "#0284C7", "name": "FK: id_estado"},
-        # Indicadores_Sociais.id_estado -> Estados.id_estado
-        {"from": (680, 920), "to": (750, 680), "color": "#7C3AED", "name": "FK: id_estado (1:1)"},
-        # Historico_Desemprego.id_estado -> Estados.id_estado
-        {"from": (1100, 920), "to": (950, 680), "color": "#7C3AED", "name": "FK: id_estado (1:N)"},
-        # Auditoria.codigo_ibge -> Municipios.codigo_ibge
-        {"from": (2120, 715), "to": (1890, 490), "color": "#059669", "name": "FK: codigo_ibge"},
-        # Auditoria.id_analista -> Analistas.id_analista
-        {"from": (2340, 640), "to": (2340, 510), "color": "#0D9488", "name": "FK: id_analista"}
+        {"from": (1480, 380), "to": (1060, 350), "color": "#0284C7", "card": "1:N", "pk_label": "1", "fk_label": "N"},
+        # Indicadores_Sociais.id_estado -> Estados.id_estado (1:1)
+        {"from": (680, 940), "to": (750, 680), "color": "#7C3AED", "card": "1:1", "pk_label": "1", "fk_label": "1"},
+        # Historico_Desemprego.id_estado -> Estados.id_estado (1:N)
+        {"from": (1100, 940), "to": (950, 680), "color": "#7C3AED", "card": "1:N", "pk_label": "1", "fk_label": "N"},
+        # Auditoria.codigo_ibge -> Municipios.codigo_ibge (1:N)
+        {"from": (2120, 715), "to": (1890, 490), "color": "#059669", "card": "1:N", "pk_label": "1", "fk_label": "N"},
+        # Auditoria.id_analista -> Analistas.id_analista (1:N)
+        {"from": (2340, 640), "to": (2340, 510), "color": "#0D9488", "card": "1:N", "pk_label": "1", "fk_label": "N"}
     ]
 
     # Draw FK connection lines
@@ -363,10 +391,9 @@ def generate_relacional():
         draw.line([(mid_x, fy), (mid_x, ty)], fill=color, width=3)
         draw.line([(mid_x, ty), (tx, ty)], fill=color, width=3)
 
-        # End markers: circle at from (crow/many end), arrow at to (1 end)
+        # End markers: circle at from (many/FK end), arrow at to (1/PK end)
         draw.ellipse((fx - 5, fy - 5, fx + 5, fy + 5), fill=color)
 
-        # Arrowhead pointing to target
         if tx > mid_x:
             draw.polygon([(tx, ty), (tx - 10, ty - 6), (tx - 10, ty + 6)], fill=color)
         elif tx < mid_x:
@@ -375,6 +402,18 @@ def generate_relacional():
             draw.polygon([(tx, ty), (tx - 6, ty - 10), (tx + 6, ty - 10)], fill=color)
         else:
             draw.polygon([(tx, ty), (tx - 6, ty + 10), (tx + 6, ty + 10)], fill=color)
+
+        # Cardinality Badge directly on line
+        badge_x = mid_x
+        badge_y = (fy + ty) // 2
+        b_text = f" {l['card']} "
+        bw = draw.textlength(b_text, font=f_card_pill) + 10
+        draw_rounded_rect(draw, (badge_x - bw//2, badge_y - 12, badge_x + bw//2, badge_y + 12), 5, fill="#FFFFFF", outline=color, width=2)
+        draw.text((badge_x - bw//2 + 5, badge_y - 10), b_text, font=f_card_pill, fill=color)
+
+        # Text labels '1' near target and 'N' near source
+        draw.text((tx + (10 if tx < fx else -20), ty - 18), l["pk_label"], font=get_font("segoeuib.ttf", 16), fill=color)
+        draw.text((fx + (-22 if tx < fx else 10), fy - 18), l["fk_label"], font=get_font("segoeuib.ttf", 16), fill=color)
 
     # Draw Table Cards
     for k, t in tables.items():
@@ -392,8 +431,6 @@ def generate_relacional():
         # Columns
         cur_y = y0 + 54
         for col_name, col_type, tag in t["cols"]:
-            # background alternate striping
-            # tag pill
             if tag:
                 if "PK" in tag:
                     draw_rounded_rect(draw, (x0 + 14, cur_y + 1, x0 + 42, cur_y + 19), 4, fill="#FEF3C7", outline="#D97706")
@@ -402,49 +439,54 @@ def generate_relacional():
                     draw_rounded_rect(draw, (x0 + 14, cur_y + 1, x0 + 42, cur_y + 19), 4, fill="#DBEAFE", outline="#2563EB")
                     draw.text((x0 + 19, cur_y + 3), "FK", font=f_tag, fill="#1D4ED8")
 
-            # column name
             f_to_use = f_col_b if tag and "PK" in tag else f_col
             color_to_use = "#0F172A" if not (tag and "PK" in tag) else "#B45309"
             draw.text((x0 + 52, cur_y + 2), col_name, font=f_to_use, fill=color_to_use)
 
-            # uq badge
             if tag and "UQ" in tag:
                 draw_rounded_rect(draw, (x1 - 180, cur_y + 2, x1 - 150, cur_y + 18), 3, fill="#EDE9FE", outline="#7C3AED")
                 draw.text((x1 - 176, cur_y + 3), "UQ", font=f_tag, fill="#6D28D9")
 
-            # data type
             tw = draw.textlength(col_type, font=f_type)
             draw.text((x1 - tw - 16, cur_y + 3), col_type, font=f_type, fill="#64748B")
 
-            # thin divider
             draw.line([(x0 + 10, cur_y + 26), (x1 - 10, cur_y + 26)], fill="#F1F5F9", width=1)
             cur_y += 30
 
     # Legend & Notes at bottom
-    leg_x0, leg_y0, leg_x1, leg_y1 = 80, 1600, W - 80, 1800
+    leg_x0, leg_y0, leg_x1, leg_y1 = 80, 1620, W - 80, 1860
     draw_rounded_rect(draw, (leg_x0, leg_y0, leg_x1, leg_y1), 10, fill="#FFFFFF", outline="#CBD5E1", width=2)
-    draw.text((leg_x0 + 30, leg_y0 + 20), "LEGENDA DO MODELO RELACIONAL:", font=get_font("segoeuib.ttf", 18), fill="#1E293B")
+    draw.text((leg_x0 + 30, leg_y0 + 20), "LEGENDA DO ESQUEMA RELACIONAL E CARDINALIDADES:", font=get_font("segoeuib.ttf", 19), fill="#1E293B")
+
+    # Cardinality badges
+    draw_rounded_rect(draw, (leg_x0 + 30, leg_y0 + 60, leg_x0 + 85, leg_y0 + 88), 5, fill="#FFFFFF", outline="#2563EB", width=2)
+    draw.text((leg_x0 + 40, leg_y0 + 64), " 1:N ", font=f_card_pill, fill="#2563EB")
+    draw.text((leg_x0 + 95, leg_y0 + 64), "Relação 1 para N (1 chave primária referenciada por múltiplas linhas na FK)", font=f_leg, fill="#334155")
+
+    draw_rounded_rect(draw, (leg_x0 + 800, leg_y0 + 60, leg_x0 + 855, leg_y0 + 88), 5, fill="#FFFFFF", outline="#7C3AED", width=2)
+    draw.text((leg_x0 + 810, leg_y0 + 64), " 1:1 ", font=f_card_pill, fill="#7C3AED")
+    draw.text((leg_x0 + 865, leg_y0 + 64), "Relação 1 para 1 (FK com constraint UNIQUE - relação unívoca)", font=f_leg, fill="#334155")
 
     # Badges explanations
-    draw_rounded_rect(draw, (leg_x0 + 30, leg_y0 + 60, leg_x0 + 65, leg_y0 + 82), 4, fill="#FEF3C7", outline="#D97706")
-    draw.text((leg_x0 + 38, leg_y0 + 63), "PK", font=f_tag, fill="#B45309")
-    draw.text((leg_x0 + 75, leg_y0 + 61), "Primary Key (Chave Primária)", font=f_leg, fill="#334155")
+    draw_rounded_rect(draw, (leg_x0 + 30, leg_y0 + 115, leg_x0 + 65, leg_y0 + 137), 4, fill="#FEF3C7", outline="#D97706")
+    draw.text((leg_x0 + 38, leg_y0 + 118), "PK", font=f_tag, fill="#B45309")
+    draw.text((leg_x0 + 75, leg_y0 + 116), "Primary Key (Chave Primária)", font=f_leg, fill="#334155")
 
-    draw_rounded_rect(draw, (leg_x0 + 380, leg_y0 + 60, leg_x0 + 415, leg_y0 + 82), 4, fill="#DBEAFE", outline="#2563EB")
-    draw.text((leg_x0 + 388, leg_y0 + 63), "FK", font=f_tag, fill="#1D4ED8")
-    draw.text((leg_x0 + 425, leg_y0 + 61), "Foreign Key (Chave Estrangeira)", font=f_leg, fill="#334155")
+    draw_rounded_rect(draw, (leg_x0 + 380, leg_y0 + 115, leg_x0 + 415, leg_y0 + 137), 4, fill="#DBEAFE", outline="#2563EB")
+    draw.text((leg_x0 + 388, leg_y0 + 118), "FK", font=f_tag, fill="#1D4ED8")
+    draw.text((leg_x0 + 425, leg_y0 + 116), "Foreign Key (Chave Estrangeira)", font=f_leg, fill="#334155")
 
-    draw_rounded_rect(draw, (leg_x0 + 750, leg_y0 + 60, leg_x0 + 785, leg_y0 + 82), 4, fill="#EDE9FE", outline="#7C3AED")
-    draw.text((leg_x0 + 756, leg_y0 + 63), "UQ", font=f_tag, fill="#6D28D9")
-    draw.text((leg_x0 + 795, leg_y0 + 61), "Unique Constraint (Restrição de Unicidade)", font=f_leg, fill="#334155")
+    draw_rounded_rect(draw, (leg_x0 + 750, leg_y0 + 115, leg_x0 + 785, leg_y0 + 137), 4, fill="#EDE9FE", outline="#7C3AED")
+    draw.text((leg_x0 + 756, leg_y0 + 118), "UQ", font=f_tag, fill="#6D28D9")
+    draw.text((leg_x0 + 795, leg_y0 + 116), "Unique Constraint (Restrição de Unicidade)", font=f_leg, fill="#334155")
 
     # Lines explanation
-    draw.line([(leg_x0 + 30, leg_y0 + 125), (leg_x0 + 70, leg_y0 + 125)], fill="#2563EB", width=3)
-    draw.polygon([(leg_x0 + 75, leg_y0 + 125), (leg_x0 + 68, leg_y0 + 120), (leg_x0 + 68, leg_y0 + 130)], fill="#2563EB")
-    draw.ellipse((leg_x0 + 26, leg_y0 + 121, leg_x0 + 34, leg_y0 + 129), fill="#2563EB")
-    draw.text((leg_x0 + 85, leg_y0 + 115), "Vínculo de Integridade Referencial (FK -> PK)", font=f_leg, fill="#334155")
+    draw.line([(leg_x0 + 30, leg_y0 + 175), (leg_x0 + 70, leg_y0 + 175)], fill="#2563EB", width=3)
+    draw.polygon([(leg_x0 + 75, leg_y0 + 175), (leg_x0 + 68, leg_y0 + 170), (leg_x0 + 68, leg_y0 + 180)], fill="#2563EB")
+    draw.ellipse((leg_x0 + 26, leg_y0 + 171, leg_x0 + 34, leg_y0 + 179), fill="#2563EB")
+    draw.text((leg_x0 + 85, leg_y0 + 168), "Linha de Integridade Referencial: Círculo (Lado N / FK) ───> Seta (Lado 1 / PK)", font=f_leg, fill="#334155")
 
-    draw.text((leg_x0 + 650, leg_y0 + 115), "Diagrama gerado de acordo com as especificações do Oracle Database e MySQL do IBGE_DESEMPREGO", font=get_font("segoeuib.ttf", 16), fill="#059669")
+    draw.text((leg_x0 + 800, leg_y0 + 168), "Oracle Database & MySQL — 8 tabelas integradas", font=get_font("segoeuib.ttf", 16), fill="#059669")
 
     out_path = "modelagem/modelo_relacional.png"
     img.save(out_path, dpi=(300, 300))
