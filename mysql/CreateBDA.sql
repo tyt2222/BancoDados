@@ -82,8 +82,6 @@ CREATE TABLE Indicadores_Sociais (
     id_indicador INT PRIMARY KEY,
     id_estado INT NOT NULL UNIQUE,
     idhm DECIMAL(4,3) NOT NULL,
-    taxa_analfabetismo DECIMAL(5,2) NOT NULL,
-    taxa_ensino_superior DECIMAL(5,2) NOT NULL,
     pct_pobreza DECIMAL(5,2) NOT NULL,
     indice_gini DECIMAL(4,3) NOT NULL,
 

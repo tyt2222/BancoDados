@@ -52,7 +52,7 @@ ORDER BY populacao_total DESC;
 
 -- 2. Cruzamento de Indicadores Sociais com Desemprego e Renda
 SELECT e.sigla, e.nome, e.taxa_desemprego, e.renda_media,
-       i.idhm, i.taxa_analfabetismo, i.taxa_ensino_superior, i.pct_pobreza, i.indice_gini
+       i.idhm, i.pct_pobreza, i.indice_gini
 FROM Estados e
 JOIN Indicadores_Sociais i ON i.id_estado = e.id_estado
 ORDER BY i.idhm DESC;
