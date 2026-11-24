@@ -73,11 +73,11 @@ JOIN Historico_Desemprego h2021 ON h2021.id_estado = e.id_estado AND h2021.ano =
 JOIN Historico_Desemprego h2024 ON h2024.id_estado = e.id_estado AND h2024.ano = 2024
 ORDER BY reducao_pontos_pct DESC;
 
--- 5. Analistas ativos e correções realizadas
-SELECT a.nome, a.cargo, a.departamento, COUNT(c.id_correcao) AS total_correcoes
+-- 5. Analistas ativos e auditorias realizadas
+SELECT a.nome, a.cargo, a.departamento, COUNT(c.id_auditoria) AS total_auditorias
 FROM Analistas a
-LEFT JOIN Correcoes c ON c.id_analista = a.id_analista
+LEFT JOIN Auditoria c ON c.id_analista = a.id_analista
 WHERE a.ativo = 1
 GROUP BY a.nome, a.cargo, a.departamento
-ORDER BY total_correcoes DESC;
+ORDER BY total_auditorias DESC;
 

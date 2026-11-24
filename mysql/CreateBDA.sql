@@ -1,6 +1,7 @@
 ﻿CREATE DATABASE IF NOT EXISTS IBGE_DESEMPREGO;
 USE IBGE_DESEMPREGO;
 
+DROP TABLE IF EXISTS Auditoria;
 DROP TABLE IF EXISTS Correcoes;
 DROP TABLE IF EXISTS Historico_Desemprego;
 DROP TABLE IF EXISTS Indicadores_Sociais;
@@ -63,9 +64,9 @@ CREATE TABLE Municipios (
     FOREIGN KEY (id_estado) REFERENCES Estados(id_estado)
 );
 
--- auditoria das correcoes do admin
-CREATE TABLE Correcoes (
-    id_correcao INT PRIMARY KEY,
+-- auditoria das alteracoes do admin
+CREATE TABLE Auditoria (
+    id_auditoria INT PRIMARY KEY,
     codigo_ibge INT NOT NULL,
     campo VARCHAR(20) NOT NULL,
     valor_antigo FLOAT,

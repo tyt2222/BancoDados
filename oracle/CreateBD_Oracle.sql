@@ -1,4 +1,5 @@
-﻿DROP TABLE IF EXISTS Correcoes;
+﻿DROP TABLE IF EXISTS Auditoria;
+DROP TABLE IF EXISTS Correcoes;
 DROP TABLE IF EXISTS Historico_Desemprego;
 DROP TABLE IF EXISTS Indicadores_Sociais;
 DROP TABLE IF EXISTS Municipios;
@@ -67,8 +68,8 @@ CREATE TABLE Municipios (
     UNIQUE (codigo_ibge)
 );
 
-CREATE TABLE Correcoes (
-    id_correcao NUMBER(8) PRIMARY KEY,
+CREATE TABLE Auditoria (
+    id_auditoria NUMBER(8) PRIMARY KEY,
     codigo_ibge NUMBER(7) NOT NULL,
     campo VARCHAR2(20) NOT NULL,
     valor_antigo NUMBER(12,2),

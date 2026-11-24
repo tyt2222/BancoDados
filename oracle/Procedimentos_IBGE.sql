@@ -10,7 +10,7 @@ CREATE OR REPLACE PROCEDURE corrigir_municipio (
     v_antigo NUMBER;
 BEGIN
 
-    SELECT NVL(MAX(id_correcao), 0) + 1 INTO v_id FROM Correcoes;
+    SELECT NVL(MAX(id_auditoria), 0) + 1 INTO v_id FROM Auditoria;
 
     IF p_campo = 'renda_media' THEN
         SELECT renda_media INTO v_antigo
@@ -31,11 +31,11 @@ BEGIN
         RETURN;
     END IF;
 
-    INSERT INTO Correcoes (id_correcao, codigo_ibge, campo, valor_antigo, valor_novo, analista, data_correcao)
+    INSERT INTO Auditoria (id_auditoria, codigo_ibge, campo, valor_antigo, valor_novo, analista, data_correcao)
     VALUES (v_id, p_ibge, p_campo, v_antigo, p_novo, p_analista, SYSDATE);
 
     COMMIT;
-    DBMS_OUTPUT.PUT_LINE('Correcao gravada em ' || SQL%ROWCOUNT || ' municipio.');
+    DBMS_OUTPUT.PUT_LINE('Auditoria gravada em ' || SQL%ROWCOUNT || ' municipio.');
 
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
