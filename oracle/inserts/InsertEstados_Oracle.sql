@@ -1,4 +1,4 @@
-﻿INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (11,1,1,'Rondônia','RO','Norte',1751950,3110,2.3);
+INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (11,1,1,'Rondônia','RO','Norte',1751950,3110,2.3);
 INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (12,1,1,'Acre','AC','Norte',884372,2497,7.3);
 INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (13,1,1,'Amazonas','AM','Norte',4321616,2383,7.7);
 INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (14,1,1,'Roraima','RR','Norte',738772,3044,5.9);

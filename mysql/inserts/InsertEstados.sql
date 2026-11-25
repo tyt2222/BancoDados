@@ -1,4 +1,4 @@
-﻿USE IBGE_DESEMPREGO;
+USE IBGE_DESEMPREGO;
 
 INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (11,1,1,'Rondônia','RO','Norte',1751950,3110,2.3);
 INSERT INTO Estados(id_estado,id_pais,id_regiao,nome,sigla,regiao,populacao,renda_media,taxa_desemprego) VALUES (12,1,1,'Acre','AC','Norte',884372,2497,7.3);

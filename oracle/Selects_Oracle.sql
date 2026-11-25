@@ -1,4 +1,4 @@
-﻿SELECT * FROM Pais;
+SELECT * FROM Pais;
 
 SELECT * FROM Estados;
 

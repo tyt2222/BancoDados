@@ -1,4 +1,4 @@
-﻿
+
 INSERT INTO Municipios(id_municipio,id_estado,uf,nome,codigo_ibge,populacao,renda_media,taxa_desemprego) VALUES (1,52,'GO','Abadia de Goiás',5200050,22052,2203.94,4.60);
 INSERT INTO Municipios(id_municipio,id_estado,uf,nome,codigo_ibge,populacao,renda_media,taxa_desemprego) VALUES (2,31,'MG','Abadia dos Dourados',3100104,6345,2415.22,3.79);
 INSERT INTO Municipios(id_municipio,id_estado,uf,nome,codigo_ibge,populacao,renda_media,taxa_desemprego) VALUES (3,52,'GO','Abadiânia',5200100,17738,1960.91,3.41);

@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS Auditoria;
+DROP TABLE IF EXISTS Auditoria;
 DROP TABLE IF EXISTS Correcoes;
 DROP TABLE IF EXISTS Historico_Desemprego;
 DROP TABLE IF EXISTS Indicadores_Sociais;

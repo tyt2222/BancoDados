@@ -8,7 +8,7 @@ const path = require('path');
 const oracledb = require('oracledb');
 
 // >>> AJUSTE AQUI PRA FACULDADE <<<
-const DB_CONNECT = 'localhost:1521/XEPDB1'; // host:porta/servico do oracle de la
+const DB_CONNECT = 'localhost:1539/FREEPDB1'; // host:porta/servico do oracle de la
 
 // senhas dos perfis, iguais as do Privilegios_IBGE.sql
 const PERFIS = {
