@@ -1,68 +1,354 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>IBGE_DESEMPREGO - painel de teste</title>
-<style>
-  * { box-sizing: border-box; margin: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f2f4f7; color: #222; padding: 24px; }
-  .caixa { max-width: 980px; margin: 0 auto; }
-  h1 { font-size: 20px; margin-bottom: 4px; }
-  .sub { color: #667; font-size: 13px; margin-bottom: 16px; }
-  section { background: #fff; border: 1px solid #e1e5eb; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
-  h2 { font-size: 15px; margin-bottom: 12px; }
-  .perfis { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .perfis label { display: flex; gap: 6px; align-items: center; padding: 8px 14px; border: 1px solid #ccd; border-radius: 8px; cursor: pointer; background: #fafbfc; font-size: 14px; }
-  .perfis label.ativo { background: #2b5cab; color: #fff; border-color: #2b5cab; }
-  #status { font-size: 13px; color: #556; margin-left: auto; }
-  .botoes { display: flex; gap: 8px; flex-wrap: wrap; }
-  button { padding: 9px 16px; border: 1px solid #ccd; border-radius: 8px; background: #fff; cursor: pointer; font-size: 14px; }
-  button:hover { background: #eef3fb; border-color: #2b5cab; }
-  .tabela-wrap { max-height: 420px; overflow: auto; margin-top: 14px; border: 1px solid #e5e8ee; border-radius: 8px; }
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th { position: sticky; top: 0; background: #f0f2f5; text-align: left; padding: 8px 10px; border-bottom: 2px solid #dde; white-space: nowrap; }
-  td { padding: 6px 10px; border-bottom: 1px solid #eef1f4; white-space: nowrap; }
-  tr:nth-child(even) td { background: #fafbfc; }
-  form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .campo { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
-  input, select { padding: 8px; border: 1px solid #ccd; border-radius: 6px; font-size: 14px; }
-  .linha-btn { grid-column: 1 / -1; margin-top: 4px; }
-  .aviso { font-size: 12px; color: #889; margin-top: 10px; }
-  #msg { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
-  .ok { background: #e7f6ec; color: #1c6b3a; }
-  .erro { background: #fdeaea; color: #a02; }
-  .info { background: #eef3fb; color: #2b5cab; }
-  code { background: #f0f2f5; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBGE_DESEMPREGO — Painel de Testes</title>
+  <style>
+    /* Reset e Configurações Globais */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .caixa {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* Cabeçalho */
+    header {
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      color: #64748b;
+      font-size: 13.5px;
+    }
+
+    code {
+      background-color: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: Consolas, monospace;
+      color: #0f172a;
+    }
+
+    /* Seções (Cards) */
+    section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 14px;
+    }
+
+    /* Seletor de Perfis de Usuário */
+    .perfis {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .perfis label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #f8fafc;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .perfis label:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .perfis label.ativo {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      font-weight: 500;
+    }
+
+    #status {
+      font-size: 13px;
+      color: #64748b;
+      margin-left: auto;
+      font-weight: 500;
+    }
+
+    /* Banner do Mapa Interativo */
+    .banner-mapa {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 18px 24px;
+    }
+
+    .banner-mapa h2 {
+      color: #ffffff;
+      margin-bottom: 4px;
+      font-size: 17px;
+    }
+
+    .banner-mapa p {
+      color: #e0e7ff;
+      font-size: 13.5px;
+    }
+
+    .btn-mapa {
+      display: inline-block;
+      padding: 10px 22px;
+      background: #ffffff;
+      color: #1e3a8a;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .btn-mapa:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Botões de Visualização */
+    .botoes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 9px 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    button:hover {
+      background: #f1f5f9;
+      border-color: #2563eb;
+      color: #1d4ed8;
+    }
+
+    /* Tabela de Resultados */
+    .tabela-wrap {
+      max-height: 440px;
+      overflow: auto;
+      margin-top: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #475569;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      white-space: nowrap;
+      color: #334155;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    tr:hover td {
+      background-color: #f1f5f9;
+    }
+
+    /* Formulário da Procedure */
+    form {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .campo label {
+      font-weight: 500;
+      color: #475569;
+    }
+
+    input, select {
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #ffffff;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .linha-btn {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+    }
+
+    .linha-btn button {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      padding: 10px 20px;
+    }
+
+    .linha-btn button:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #ffffff;
+    }
+
+    /* Avisos e Mensagens de Feedback */
+    .aviso {
+      font-size: 12.5px;
+      color: #64748b;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+
+    #msg {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      display: none;
+    }
+
+    .ok {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .erro {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .info {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+  </style>
 </head>
 <body>
 <div class="caixa">
 
-  <h1>IBGE_DESEMPREGO — painel de teste</h1>
-  <div class="sub">Cada perfil conecta no Oracle com o proprio usuario, entao as permissoes do <code>Privilegios_IBGE.sql</code> valem de verdade</div>
+  <header>
+    <h1>IBGE_DESEMPREGO — Painel de Teste</h1>
+    <div class="sub">
+      Cada perfil conecta no Oracle com o próprio usuário, validando as permissões do <code>Privilegios_IBGE.sql</code> em tempo real.
+    </div>
+  </header>
 
+  <!-- Seção 1: Seleção de Perfil / Usuário -->
   <section>
-    <h2>Quem esta usando</h2>
+    <h2>1. Perfil Conectado</h2>
     <div class="perfis">
-      <label><input type="radio" name="perfil" value="dono"> dono (IBGE_DESEMPREGO)</label>
-      <label class="ativo"><input type="radio" name="perfil" value="mapa_app" checked> mapa_app (site)</label>
-      <label><input type="radio" name="perfil" value="site_admin"> site_admin (admin)</label>
+      <label>
+        <input type="radio" name="perfil" value="dono">
+        <span>dono (IBGE_DESEMPREGO)</span>
+      </label>
+      <label class="ativo">
+        <input type="radio" name="perfil" value="mapa_app" checked>
+        <span>mapa_app (site)</span>
+      </label>
+      <label>
+        <input type="radio" name="perfil" value="site_admin">
+        <span>site_admin (admin)</span>
+      </label>
       <span id="status">conectando...</span>
     </div>
   </section>
 
-  <section style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; border: none;">
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-      <div>
-        <h2 style="color: #fff; margin-bottom: 4px; font-size: 17px;">🗺️ Mapa Temático Interativo do Brasil</h2>
-        <div style="color: #e0e7ff; font-size: 13px;">Escala de calor de desemprego com zoom e drill-down por estado e município</div>
-      </div>
-      <a href="/mapa" target="_blank" style="display: inline-block; padding: 10px 20px; background: #fff; color: #1e3a8a; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">Abrir Mapa Interativo &rarr;</a>
+  <!-- Seção 2: Banner do Mapa Temático -->
+  <section class="banner-mapa">
+    <div>
+      <h2>🗺️ Mapa Temático Interativo do Brasil</h2>
+      <p>Escala de calor de desemprego com zoom e drill-down dinâmico por estado e município.</p>
     </div>
+    <a href="/mapa" target="_blank" class="btn-mapa">Abrir Mapa Interativo &rarr;</a>
   </section>
 
+  <!-- Seção 3: Visualizador de Tabelas e Views -->
   <section>
-    <h2>Visualizar tabelas e views</h2>
+    <h2>2. Visualizar Tabelas e Views</h2>
     <div class="botoes">
       <button data-obj="PAIS">Pais</button>
       <button data-obj="REGIOES">Regioes</button>
@@ -76,94 +362,149 @@
       <button data-obj="VW_DESEMPREGO_ESTADO">vw_desemprego_estado</button>
       <button data-obj="VW_RANKING_DESEMPREGO">vw_ranking_desemprego</button>
     </div>
-    <div class="tabela-wrap" id="saida"><div style="padding:20px;color:#889;font-size:13px">escolha uma tabela ou view ai em cima</div></div>
+    <div class="tabela-wrap" id="saida">
+      <div style="padding: 24px; color: #64748b; font-size: 13.5px; text-align: center;">
+        Selecione uma tabela ou view acima para carregar os registros.
+      </div>
+    </div>
   </section>
 
+  <!-- Seção 4: Teste de Stored Procedure com Auditoria -->
   <section>
-    <h2>Testar a procedure corrigir_municipio</h2>
+    <h2>3. Testar a Procedure corrigir_municipio</h2>
     <form id="fcorrigir">
-      <div class="campo"><label>Codigo IBGE</label><input name="ibge" type="number" placeholder="2600054" required></div>
-      <div class="campo"><label>Campo</label>
+      <div class="campo">
+        <label>Código IBGE</label>
+        <input name="ibge" type="number" placeholder="Ex: 2600054" required>
+      </div>
+      <div class="campo">
+        <label>Campo</label>
         <select name="campo">
           <option value="renda_media">renda_media</option>
           <option value="taxa_desemprego">taxa_desemprego</option>
         </select>
       </div>
-      <div class="campo"><label>Valor novo</label><input name="valor" type="number" step="0.01" placeholder="1550.00" required></div>
-      <div class="campo"><label>Analista</label><input name="analista" value="site_admin" required></div>
-      <div class="linha-btn"><button type="submit">Corrigir municipio</button></div>
+      <div class="campo">
+        <label>Valor Novo</label>
+        <input name="valor" type="number" step="0.01" placeholder="Ex: 1550.00" required>
+      </div>
+      <div class="campo">
+        <label>Analista</label>
+        <input name="analista" value="site_admin" required>
+      </div>
+      <div class="linha-btn">
+        <button type="submit">Executar Correção</button>
+      </div>
     </form>
-    <div class="aviso">Dica de demonstracao: envie essa correcao logado como <b>mapa_app</b> — o Oracle bloqueia (sem privilegio) e depois como <b>site_admin</b> — passa e grava na Correcoes.</div>
+    <div class="aviso">
+      <b>Dica de Demonstração:</b> Execute logado como <b>mapa_app</b> para ver o Oracle bloquear com erro de privilégio insuficiente (ORA-01031), e depois como <b>site_admin</b> para autorizar e gravar na tabela <code>Auditoria</code>.
+    </div>
     <div id="msg"></div>
   </section>
 
 </div>
 
 <script>
-const $ = s => document.querySelector(s);
-let perfil = 'mapa_app';
+  const $ = selector => document.querySelector(selector);
+  let perfil = 'mapa_app';
 
-function msg(texto, classe) {
-  const m = $('#msg');
-  m.textContent = texto;
-  m.className = classe;
-  m.style.display = 'block';
-}
-
-async function post(url, dados) {
-  const r = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
-  return r.json();
-}
-
-// troca de perfil, reconecta e mostra o usuario do oracle
-async function trocarPerfil(novo) {
-  perfil = novo;
-  $('#status').textContent = 'conectando...';
-  const r = await post('/api/testar', { perfil });
-  $('#status').textContent = r.usuario ? ('conectado como ' + r.usuario) : ('ERRO: ' + r.erro);
-  $('#status').style.color = r.usuario ? '#1c6b3a' : '#a02';
-}
-
-document.querySelectorAll('input[name=perfil]').forEach(r =>
-  r.addEventListener('change', () => {
-    document.querySelectorAll('.perfis label').forEach(l => l.classList.remove('ativo'));
-    r.closest('label').classList.add('ativo');
-    trocarPerfil(r.value);
-  }));
-
-// botoes de visualizar
-document.querySelectorAll('button[data-obj]').forEach(b =>
-  b.addEventListener('click', async () => {
-    $('#saida').innerHTML = '<div style="padding:20px;color:#889;font-size:13px">carregando ' + b.textContent + '...</div>';
-    const r = await post('/api/listar', { perfil, objeto: b.dataset.obj });
-    if (r.erro) {
-      $('#saida').innerHTML = '<div style="padding:20px;color:#a02;font-size:13px">Oracle bloqueou: <b>' + r.erro + '</b>' +
-        (r.codigo ? ' (ORA-' + r.codigo + ')' : '') +
-        '<br>ou seja, esse perfil nao tem permissao nisso</div>';
-      return;
-    }
-    let html = '<table><thead><tr>' + r.colunas.map(c => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>';
-    for (const linha of r.linhas) html += '<tr>' + linha.map(v => '<td>' + (v === null ? '—' : v) + '</td>').join('') + '</tr>';
-    html += '</tbody></table>';
-    $('#saida').innerHTML = html + '<div style="padding:8px 12px;color:#889;font-size:12px">' + r.linhas.length + ' linha(s) exibidas (limite 200) — conectado como ' + r.usuario + '</div>';
-  }));
-
-// formulario da procedure
-$('#fcorrigir').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const f = ev.target;
-  const r = await post('/api/corrigir', {
-    perfil, ibge: f.ibge.value, campo: f.campo.value, valor: f.valor.value, analista: f.analista.value
-  });
-  if (r.erro) msg('Falhou: ' + r.erro + (r.codigo ? ' (ORA-' + r.codigo + ')' : ''), 'erro');
-  else {
-    msg('Correcao gravada! O municipio ' + f.ibge.value + ' foi atualizado e o registro entrou na tabela Correcoes.', 'ok');
-    f.reset();
-    f.analista.value = 'site_admin';
+  function msg(texto, classe) {
+    const m = $('#msg');
+    m.textContent = texto;
+    m.className = classe;
+    m.style.display = 'block';
   }
-});
 
-trocarPerfil(perfil);
+  async function post(url, dados) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
+    return res.json();
+  }
+
+  // Alterna o perfil ativo e verifica o usuário no Oracle
+  async function trocarPerfil(novo) {
+    perfil = novo;
+    $('#status').textContent = 'conectando...';
+    $('#status').style.color = '#64748b';
+
+    const r = await post('/api/testar', { perfil });
+    if (r.usuario) {
+      $('#status').textContent = 'Conectado como: ' + r.usuario;
+      $('#status').style.color = '#059669';
+    } else {
+      $('#status').textContent = 'ERRO: ' + r.erro;
+      $('#status').style.color = '#dc2626';
+    }
+  }
+
+  // Monitora a troca de radio buttons de perfil
+  document.querySelectorAll('input[name=perfil]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.perfis label').forEach(l => l.classList.remove('ativo'));
+      radio.closest('label').classList.add('ativo');
+      trocarPerfil(radio.value);
+    });
+  });
+
+  // Botões de listagem de tabelas e views
+  document.querySelectorAll('button[data-obj]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      $('#saida').innerHTML = '<div style="padding: 24px; color: #64748b; font-size: 13.5px; text-align: center;">Carregando ' + btn.textContent + '...</div>';
+
+      const r = await post('/api/listar', { perfil, objeto: btn.dataset.obj });
+      if (r.erro) {
+        $('#saida').innerHTML =
+          '<div style="padding: 24px; color: #991b1b; font-size: 13.5px;">' +
+          '<strong>Oracle bloqueou:</strong> ' + r.erro + (r.codigo ? ' (ORA-' + r.codigo + ')' : '') + '<br>' +
+          '<span style="color: #64748b; font-size: 12.5px;">Demonstração: este perfil não possui privilégio de SELECT sobre esse objeto.</span>' +
+          '</div>';
+        return;
+      }
+
+      let html = '<table><thead><tr>';
+      html += r.colunas.map(c => '<th>' + c + '</th>').join('');
+      html += '</tr></thead><tbody>';
+
+      for (const linha of r.linhas) {
+        html += '<tr>' + linha.map(v => '<td>' + (v === null ? '—' : v) + '</td>').join('') + '</tr>';
+      }
+      html += '</tbody></table>';
+
+      $('#saida').innerHTML =
+        html +
+        '<div style="padding: 10px 14px; color: #64748b; font-size: 12px; background: #f8fafc; border-top: 1px solid #e2e8f0;">' +
+        r.linhas.length + ' linha(s) exibidas (limite de 200) — Consulta executada por <b>' + r.usuario + '</b>' +
+        '</div>';
+    });
+  });
+
+  // Envio do formulário para chamar a Stored Procedure
+  $('#fcorrigir').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const f = ev.target;
+
+    const r = await post('/api/corrigir', {
+      perfil,
+      ibge: f.ibge.value,
+      campo: f.campo.value,
+      valor: f.valor.value,
+      analista: f.analista.value
+    });
+
+    if (r.erro) {
+      msg('Falha na execução: ' + r.erro + (r.codigo ? ' (ORA-' + r.codigo + ')' : ''), 'erro');
+    } else {
+      msg('Correção gravada com sucesso! O município ' + f.ibge.value + ' foi atualizado e a auditoria foi registrada na tabela Auditoria.', 'ok');
+      f.reset();
+      f.analista.value = 'site_admin';
+    }
+  });
+
+  // Inicializa com o perfil default
+  trocarPerfil(perfil);
 </script>
 </body>
 </html>
