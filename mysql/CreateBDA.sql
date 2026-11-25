@@ -21,10 +21,13 @@ CREATE TABLE Pais (
 
 CREATE TABLE Regioes (
     id_regiao INT PRIMARY KEY,
+    id_pais INT NOT NULL,
     nome VARCHAR(20) NOT NULL UNIQUE,
     sigla VARCHAR(2) NOT NULL UNIQUE,
     area_km2 DECIMAL(10,2) NOT NULL,
-    qtd_estados INT NOT NULL
+    qtd_estados INT NOT NULL,
+
+    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais)
 );
 
 CREATE TABLE Analistas (
@@ -38,8 +41,7 @@ CREATE TABLE Analistas (
 
 CREATE TABLE Estados (
     id_estado INT PRIMARY KEY,
-    id_pais INT NOT NULL,
-    id_regiao INT,
+    id_regiao INT NOT NULL,
     nome VARCHAR(50) NOT NULL,
     sigla VARCHAR(2) NOT NULL UNIQUE,
     regiao VARCHAR(50) NOT NULL,
@@ -47,7 +49,6 @@ CREATE TABLE Estados (
     renda_media FLOAT NOT NULL,
     taxa_desemprego FLOAT NOT NULL,
 
-    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais),
     FOREIGN KEY (id_regiao) REFERENCES Regioes(id_regiao)
 );
 

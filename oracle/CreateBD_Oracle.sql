@@ -18,11 +18,13 @@ CREATE TABLE Pais (
 
 CREATE TABLE Regioes (
     id_regiao NUMBER(1) PRIMARY KEY,
+    id_pais NUMBER(4) NOT NULL,
     nome VARCHAR2(20) NOT NULL,
     sigla VARCHAR2(2) NOT NULL,
     area_km2 NUMBER(10,2) NOT NULL,
     qtd_estados NUMBER(2) NOT NULL,
 
+    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais),
     UNIQUE (sigla),
     UNIQUE (nome)
 );
@@ -41,8 +43,7 @@ CREATE TABLE Analistas (
 
 CREATE TABLE Estados (
     id_estado NUMBER(2) PRIMARY KEY,
-    id_pais NUMBER(4) NOT NULL,
-    id_regiao NUMBER(1),
+    id_regiao NUMBER(1) NOT NULL,
     nome VARCHAR2(50) NOT NULL,
     sigla VARCHAR2(2) NOT NULL,
     regiao VARCHAR2(20) NOT NULL,
@@ -50,7 +51,6 @@ CREATE TABLE Estados (
     renda_media NUMBER(12,2) NOT NULL,
     taxa_desemprego NUMBER(5,2) NOT NULL,
 
-    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais),
     FOREIGN KEY (id_regiao) REFERENCES Regioes(id_regiao),
     UNIQUE (sigla)
 );
@@ -105,7 +105,6 @@ CREATE TABLE Historico_Desemprego (
     FOREIGN KEY (id_estado) REFERENCES Estados(id_estado),
     UNIQUE (id_estado, ano)
 );
-
 
 -- indexes ajudam a acelerar as pesquisas atraves da criacao de indices de buscas
 CREATE INDEX idx_municipio_uf ON Municipios(uf);
