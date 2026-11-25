@@ -11,9 +11,11 @@ Base futura para um mapa de desemprego (o join com o mapa do pais e pelo codigo_
 4. oracle/inserts/InsertEstados_Oracle.sql — IBGE_DESEMPREGO
 5. oracle/inserts/InsertMunicipios_Oracle.sql — IBGE_DESEMPREGO
 6. oracle/Views_IBGE.sql — IBGE_DESEMPREGO
-7. oracle/Procedimentos_IBGE.sql — IBGE_DESEMPREGO
-8. oracle/Privilegios_IBGE.sql — IBGE_DESEMPREGO
-9. oracle/Selects_Oracle.sql — IBGE_DESEMPREGO
+7. oracle/Functions.sql — IBGE_DESEMPREGO
+8. oracle/Procedimentos.sql — IBGE_DESEMPREGO
+9. oracle/Triggers.sql — IBGE_DESEMPREGO
+10. oracle/Privilegios_IBGE.sql — IBGE_DESEMPREGO
+11. oracle/Selects_Oracle.sql — IBGE_DESEMPREGO
 
 ## Reset do banco (caso queira recomeçar do zero)
 
