@@ -17,6 +17,6 @@ Base futura para um mapa de desemprego (o join com o mapa do pais e pelo codigo_
 10. oracle/Privilegios_IBGE.sql — IBGE_DESEMPREGO
 11. oracle/Selects_Oracle.sql — IBGE_DESEMPREGO
 
-## Reset do banco (caso queira recomeçar do zero)
+## Reset do banco
 
 - oracle/Reset_Oracle.sql — Executar como SYSTEM (MUDAR PDB)
