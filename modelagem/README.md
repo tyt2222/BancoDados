@@ -52,7 +52,4 @@ Para manter a integridade dos dados, as informações municipais podem ser corri
 | **Municipios** | Auditado em | **1:N** | **Auditoria** | `Auditoria.codigo_ibge` ──> `Municipios.codigo_ibge` | Log histórico de alterações ocorridas no município. |
 | **Analistas** | Efetua | **1:N** | **Auditoria** | `Auditoria.id_analista` ──> `Analistas.id_analista` | Rastreamento do analista responsável pela alteração. |
 
-### Notações Adotadas:
-* **1:N (Um para Muitos)**: Ocorrência singular no lado 1 associada a múltiplas no lado N.
-* **1:1 (Um para Um)**: Ocorrência singular em ambos os lados, assegurada por restrição de unicidade (`UNIQUE`) na chave estrangeira.
-* **N:M (Muitos para Muitos)**: Resolvido fisicamente através da tabela associativa `Auditoria` conectando `Analistas` e `Municipios`.
+
