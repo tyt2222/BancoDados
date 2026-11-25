@@ -21,18 +21,15 @@ CREATE TABLE Pais (
 
 CREATE TABLE Regioes (
     id_regiao INT PRIMARY KEY,
-    id_pais INT NOT NULL,
     nome VARCHAR(20) NOT NULL UNIQUE,
     sigla VARCHAR(2) NOT NULL UNIQUE,
     area_km2 DECIMAL(10,2) NOT NULL,
-    qtd_estados INT NOT NULL,
-
-    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais)
+    qtd_estados INT NOT NULL
 );
 
 CREATE TABLE Analistas (
     id_analista INT PRIMARY KEY,
-    nome VARCHAR(60) NOT NULL,
+    nome VARCHAR(80) NOT NULL,
     email VARCHAR(80) NOT NULL UNIQUE,
     cargo VARCHAR(40) NOT NULL,
     departamento VARCHAR(50) NOT NULL,
@@ -41,7 +38,8 @@ CREATE TABLE Analistas (
 
 CREATE TABLE Estados (
     id_estado INT PRIMARY KEY,
-    id_regiao INT NOT NULL,
+    id_pais INT NOT NULL,
+    id_regiao INT,
     nome VARCHAR(50) NOT NULL,
     sigla VARCHAR(2) NOT NULL UNIQUE,
     regiao VARCHAR(50) NOT NULL,
@@ -49,6 +47,7 @@ CREATE TABLE Estados (
     renda_media FLOAT NOT NULL,
     taxa_desemprego FLOAT NOT NULL,
 
+    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais),
     FOREIGN KEY (id_regiao) REFERENCES Regioes(id_regiao)
 );
 
@@ -69,10 +68,10 @@ CREATE TABLE Municipios (
 CREATE TABLE Auditoria (
     id_auditoria INT PRIMARY KEY,
     codigo_ibge INT NOT NULL,
-    campo VARCHAR(20) NOT NULL,
-    valor_antigo FLOAT,
-    valor_novo FLOAT,
-    analista VARCHAR(30),
+    campo VARCHAR(30) NOT NULL,
+    valor_antigo VARCHAR(100),
+    valor_novo VARCHAR(100),
+    analista VARCHAR(80),
     id_analista INT,
     data_correcao DATE,
 
@@ -85,7 +84,7 @@ CREATE TABLE Indicadores_Sociais (
     id_estado INT NOT NULL UNIQUE,
     idhm DECIMAL(4,3) NOT NULL,
     pct_pobreza DECIMAL(5,2) NOT NULL,
-    indice_gini DECIMAL(4,3) NOT NULL,
+    indice_gini DECIMAL(5,2) NOT NULL,
 
     FOREIGN KEY (id_estado) REFERENCES Estados(id_estado)
 );

@@ -1,6 +1,6 @@
 # Entregável 1: Modelagem do Banco de Dados — IBGE_DESEMPREGO
 
-Este documento e pasta compõem o **Entregável Documental (Concepção e Modelagem)** da disciplina Banco de Dados 2 (IFSP), contemplando o **Minimundo**, o **Modelo Entidade-Relacionamento (MER)** e o **Modelo Relacional** integrando o esquema base do IBGE em conformidade estrita com a 3ª Forma Normal (3FN).
+Este documento e pasta compõem o **Entregável Documental (Concepção e Modelagem)** da disciplina Banco de Dados 2 (IFSP), contemplando o **Minimundo**, o **Modelo Entidade-Relacionamento (MER)** e o **Modelo Relacional** integrando o esquema base do IBGE.
 
 ---
 
@@ -8,13 +8,10 @@ Este documento e pasta compõem o **Entregável Documental (Concepção e Modela
 
 O sistema **IBGE_DESEMPREGO** tem por finalidade centralizar, gerenciar e disponibilizar dados socioeconômicos e estatísticas oficiais sobre o mercado de trabalho brasileiro, permitindo análises comparativas e espaciais entre macro-regiões, unidades federativas e municípios.
 
-### 1.1. Estrutura Territorial Base (Cadeia Hierárquica Normalizada)
-O domínio modela a divisão territorial brasileira de forma hierárquica e normalizada em cascata:
-$$\textbf{PAIS } (1) \xrightarrow{1:N} \textbf{REGIOES } (N) \xrightarrow{1:N} \textbf{ESTADOS } (N) \xrightarrow{1:N} \textbf{MUNICIPIOS } (N)$$
-
-* O território nacional (**Pais**) abriga as cinco macro-regiões oficiais do IBGE (**Regioes**: Norte, Nordeste, Sudeste, Sul e Centro-Oeste), onde cada região referencia seu país de origem (`Regioes.id_pais -> Pais.id_pais`).
-* Cada macro-região agrupa múltiplos **Estados** (Unidades Federativas), de modo que cada estado referencia unicamente sua região (`Estados.id_regiao -> Regioes.id_regiao`), eliminando dependências transitivas e redundâncias (3FN). Cada estado armazena seu código, sigla única (2 letras), nome oficial, população residente, renda média e taxa de desemprego.
-* Cada estado é composto por dezenas ou centenas de **Municipios**. Cada município é identificado unicamente pelo seu **código oficial do IBGE de 7 dígitos**, além de armazenar seu nome, UF de vínculo (`Municipios.id_estado -> Estados.id_estado`), população e indicadores locais de rendimento médio e taxa de desocupação.
+### 1.1. Estrutura Territorial Base
+O domínio abrange o território nacional (**Pais**), subdividido nas cinco macro-regiões oficiais do IBGE (**Regioes**: Norte, Nordeste, Sudeste, Sul e Centro-Oeste). Cada região agrega múltiplos **Estados** (UFs), e cada estado é composto por múltiplos **Municipios**.
+* Cada estado possui código de identificação (`id_estado`), vínculo com o país (`id_pais`) e com sua região geográfica (`id_regiao`), sigla única de 2 caracteres, nome oficial, população residente, renda média e taxa de desocupação (desemprego).
+* Cada município é identificado unicamente pelo seu **código oficial do IBGE de 7 dígitos**, além de armazenar seu nome, UF de vínculo (`Municipios.id_estado -> Estados.id_estado`), população e os indicadores locais de rendimento médio e taxa de desemprego.
 
 ### 1.2. Expansão Analítica e Séries Históricas
 Para viabilizar estudos longitudinais e cruzamento de vulnerabilidades:
@@ -31,18 +28,15 @@ Para manter a integridade dos dados, as informações municipais podem ser corri
 ## 2. 📌 Arquivos e Diagramas Disponíveis
 
 1. **`modelo_entidade_relacionamento.png` (MER Conceitual)**
-   * Diagrama Conceitual Entidade-Relacionamento com a hierarquia territorial `Pais -> Regioes -> Estados -> Municipios`.
+   * Diagrama Conceitual Entidade-Relacionamento oficial gerado no Draw.io.
    * Contempla as 8 entidades (`Pais`, `Regioes`, `Estados`, `Municipios`, `Analistas`, `Auditoria`, `Indicadores_Sociais`, `Historico_Desemprego`).
-   * Apresenta os losangos de relacionamento com verbos semânticos (`ABRIGA`, `AGRUPA`, `CONTÉM`, `POSSUI`, `REGISTRA`, `AUDITADO_EM`, `EFETUA`), badges destacados com a cardinalidade macro (`1:N` e `1:1`) e as cardinalidades estruturais mínimas/máximas `(min, max)`.
+   * Apresenta os losangos de relacionamento com verbos semânticos (`ABRIGA`, `AGRUPA`, `CONTÉM`, `POSSUI`, `REGISTRA`, `AUDITADO EM`, `EFETUA`) e badges de cardinalidade (`1:N` e `1:1`).
 
 2. **`modelo_relacional.png` (Modelo Lógico Relacional / DER)**
-   * Esquema Lógico Relacional detalhado com todas as 8 tabelas normalizadas em 3FN.
+   * Esquema Lógico Relacional detalhado com todas as 8 tabelas normalizadas.
    * Especificação formal das colunas com tipos de dados nativos do Oracle/MySQL (`NUMBER`, `VARCHAR2`, `DATE`).
    * Identificação de chaves primárias (**PK**), chaves estrangeiras (**FK**) e restrições de unicidade (**UQ**).
    * Linhas ortogonais de integridade referencial com marcadores e badges indicando as cardinalidades `1:N` e `1:1`.
-
-3. **`gerar_diagramas.py`**
-   * Script Python automatizado responsável pela renderização gráfica vetorial dos diagramas para PNG em alta resolução (300 DPI).
 
 ---
 
@@ -50,7 +44,7 @@ Para manter a integridade dos dados, as informações municipais podem ser corri
 
 | Entidade Origem (1) | Verbo de Ligação | Cardinalidade | Entidade Destino (N / 1) | Chave Estrangeira (FK) | Regra de Integridade |
 | :--- | :---: | :---: | :--- | :--- | :--- |
-| **Pais** | Abriga | **1:N** | **Regioes** | `Regioes.id_pais` ──> `Pais.id_pais` | Cada macro-região pertence a 1 país. |
+| **Pais** | Abriga | **1:N** | **Estados** | `Estados.id_pais` ──> `Pais.id_pais` | Cada estado pertence obrigatoriamente a 1 país. |
 | **Regioes** | Agrupa | **1:N** | **Estados** | `Estados.id_regiao` ──> `Regioes.id_regiao` | Cada estado pertence a 1 macro-região. |
 | **Estados** | Contém | **1:N** | **Municipios** | `Municipios.id_estado` ──> `Estados.id_estado` | Cada município pertence a um único estado. |
 | **Estados** | Possui | **1:1** | **Indicadores_Sociais** | `Indicadores_Sociais.id_estado` ──> `Estados.id_estado` | Exclusivo (`UNIQUE`), 1 registro de indicadores por UF. |
@@ -62,7 +56,3 @@ Para manter a integridade dos dados, as informações municipais podem ser corri
 * **1:N (Um para Muitos)**: Ocorrência singular no lado 1 associada a múltiplas no lado N.
 * **1:1 (Um para Um)**: Ocorrência singular em ambos os lados, assegurada por restrição de unicidade (`UNIQUE`) na chave estrangeira.
 * **N:M (Muitos para Muitos)**: Resolvido fisicamente através da tabela associativa `Auditoria` conectando `Analistas` e `Municipios`.
-* **(min, max)**:
-  * `(1,1)`: Participação obrigatória unívoca.
-  * `(1,n)`: Participação obrigatória múltipla.
-  * `(0,n)`: Participação opcional múltipla (ex.: municípios ou analistas que ainda não possuem registros de auditoria).

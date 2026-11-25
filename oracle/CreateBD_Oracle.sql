@@ -17,14 +17,12 @@ CREATE TABLE Pais (
 );
 
 CREATE TABLE Regioes (
-    id_regiao NUMBER(1) PRIMARY KEY,
-    id_pais NUMBER(4) NOT NULL,
+    id_regiao NUMBER(2) PRIMARY KEY,
     nome VARCHAR2(20) NOT NULL,
     sigla VARCHAR2(2) NOT NULL,
     area_km2 NUMBER(10,2) NOT NULL,
     qtd_estados NUMBER(2) NOT NULL,
 
-    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais),
     UNIQUE (sigla),
     UNIQUE (nome)
 );
@@ -32,7 +30,7 @@ CREATE TABLE Regioes (
 -- registra os usuarios do sistema
 CREATE TABLE Analistas (
     id_analista NUMBER(4) PRIMARY KEY,
-    nome VARCHAR2(60) NOT NULL,
+    nome VARCHAR2(80) NOT NULL,
     email VARCHAR2(80) NOT NULL,
     cargo VARCHAR2(40) NOT NULL,
     departamento VARCHAR2(50) NOT NULL,
@@ -43,7 +41,8 @@ CREATE TABLE Analistas (
 
 CREATE TABLE Estados (
     id_estado NUMBER(2) PRIMARY KEY,
-    id_regiao NUMBER(1) NOT NULL,
+    id_pais NUMBER(4) NOT NULL,
+    id_regiao NUMBER(2),
     nome VARCHAR2(50) NOT NULL,
     sigla VARCHAR2(2) NOT NULL,
     regiao VARCHAR2(20) NOT NULL,
@@ -51,12 +50,13 @@ CREATE TABLE Estados (
     renda_media NUMBER(12,2) NOT NULL,
     taxa_desemprego NUMBER(5,2) NOT NULL,
 
+    FOREIGN KEY (id_pais) REFERENCES Pais(id_pais),
     FOREIGN KEY (id_regiao) REFERENCES Regioes(id_regiao),
     UNIQUE (sigla)
 );
 
 CREATE TABLE Municipios (
-    id_municipio NUMBER(6) PRIMARY KEY,
+    id_municipio NUMBER(7) PRIMARY KEY,
     id_estado NUMBER(2) NOT NULL,
     uf VARCHAR2(2) NOT NULL,
     nome VARCHAR2(80) NOT NULL,
@@ -73,10 +73,10 @@ CREATE TABLE Municipios (
 CREATE TABLE Auditoria (
     id_auditoria NUMBER(8) PRIMARY KEY,
     codigo_ibge NUMBER(7) NOT NULL,
-    campo VARCHAR2(20) NOT NULL,
-    valor_antigo NUMBER(12,2),
-    valor_novo NUMBER(12,2),
-    analista VARCHAR2(30),
+    campo VARCHAR2(30) NOT NULL,
+    valor_antigo VARCHAR2(100),
+    valor_novo VARCHAR2(100),
+    analista VARCHAR2(80),
     id_analista NUMBER(4),
     data_correcao DATE,
 
@@ -89,7 +89,7 @@ CREATE TABLE Indicadores_Sociais (
     id_estado NUMBER(2) NOT NULL,
     idhm NUMBER(4,3) NOT NULL,
     pct_pobreza NUMBER(5,2) NOT NULL,
-    indice_gini NUMBER(4,3) NOT NULL,
+    indice_gini NUMBER(5,2) NOT NULL,
 
     FOREIGN KEY (id_estado) REFERENCES Estados(id_estado),
     UNIQUE (id_estado)
