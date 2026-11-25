@@ -1,8 +1,10 @@
+-- mostra informacoes sobre o desemprego do municipio
 CREATE OR REPLACE VIEW vw_desemprego_municipio AS
 SELECT m.codigo_ibge, m.nome, m.uf, e.regiao, m.populacao, m.renda_media, m.taxa_desemprego
 FROM Municipios m
 JOIN Estados e ON e.id_estado = m.id_estado;
 
+-- calcula de maneira dinamica a taxa de desemprego de um estado
 CREATE OR REPLACE VIEW vw_desemprego_estado AS
 SELECT  e.sigla, 
         e.nome, 
@@ -15,6 +17,7 @@ FROM Estados e
 JOIN Municipios m ON m.id_estado = e.id_estado
 GROUP BY e.sigla, e.nome, e.regiao, e.populacao;
 
+-- visao read only que expoe apenas as colunas essencias entre municipios
 CREATE OR REPLACE VIEW vw_ranking_desemprego AS
 SELECT nome, uf, regiao, taxa_desemprego, renda_media
 FROM vw_desemprego_municipio

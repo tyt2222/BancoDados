@@ -1,6 +1,6 @@
--- servidor simples pra testar o IBGE_DESEMPREGO pela web
--- na faculdade: npm install oracledb, ajuste a conexao e rode node server.js
--- (nao precisa do Oracle Client instalado, o driver roda em modo thin)
+// servidor simples pra testar o IBGE_DESEMPREGO pela web
+// na faculdade: npm install oracledb, ajuste a conexao e rode node server.js
+// (nao precisa do Oracle Client instalado, o driver roda em modo thin)
 
 const http = require('http');
 const fs = require('fs');
@@ -46,6 +46,23 @@ async function abrir(perfil) {
         password: PERFIS[perfil].password,
         connectString: DB_CONNECT
     });
+}
+
+// ===== MAPA: consulta sempre com o perfil mapa_app (so SELECT nas views) =====
+async function mapaConsulta(res, sql, binds = {}, unico = false) {
+    let conn;
+    try {
+        conn = await abrir('mapa_app');
+        const r = await conn.execute(sql, binds, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+        const linhas = r.rows.map(l => Object.fromEntries(Object.entries(l).map(([k, v]) => [k.toLowerCase(), v])));
+        if (unico) return linhas[0] ? json(res, linhas[0]) : (res.writeHead(404), res.end('{"erro":"municipio nao encontrado"}'));
+        json(res, linhas);
+    } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ erro: String(e.message).split('\n')[0] }));
+    } finally {
+        if (conn) await conn.close().catch(() => {});
+    }
 }
 
 const server = http.createServer(async (req, res) => {
@@ -118,6 +135,37 @@ const server = http.createServer(async (req, res) => {
             if (conn) await conn.close().catch(() => {});
         }
         return;
+    }
+
+    // ===== MAPA =====
+    if (req.method === 'GET' && req.url === '/mapa') {
+        // a chave do Google fica em variavel de ambiente, nao no codigo: GOOGLE_MAPS_KEY=... node server.js
+        const html = fs.readFileSync(path.join(__dirname, 'mapa.html'), 'utf8')
+            .replace('__GOOGLE_MAPS_KEY__', process.env.GOOGLE_MAPS_KEY || '');
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
+        return;
+    }
+
+    let m;
+    if (req.method === 'GET' && req.url === '/api/mapa/estados') {
+        return mapaConsulta(res,
+            'SELECT sigla, nome, regiao, populacao, taxa_media, renda_media, qtd_municipios FROM ' + DONO + '.vw_desemprego_estado');
+    }
+    if (req.method === 'GET' && (m = req.url.match(/^\/api\/mapa\/uf\/([A-Za-z]{2})$/))) {
+        return mapaConsulta(res,
+            'SELECT codigo_ibge, nome, taxa_desemprego, renda_media, populacao FROM ' + DONO + '.vw_desemprego_municipio WHERE uf = :uf',
+            { uf: m[1].toUpperCase() });
+    }
+    if (req.method === 'GET' && (m = req.url.match(/^\/api\/mapa\/municipio\/(\d{7})$/))) {
+        return mapaConsulta(res,
+            'SELECT * FROM (SELECT codigo_ibge, nome, uf, regiao, populacao, renda_media, taxa_desemprego, ' +
+            'RANK() OVER (PARTITION BY uf ORDER BY taxa_desemprego DESC) AS posicao_uf, ' +
+            'COUNT(*) OVER (PARTITION BY uf) AS total_uf, ' +
+            'ROUND(AVG(taxa_desemprego) OVER (PARTITION BY uf), 2) AS media_uf, ' +
+            'ROUND(AVG(taxa_desemprego) OVER (), 2) AS media_br ' +
+            'FROM ' + DONO + '.vw_desemprego_municipio) WHERE codigo_ibge = :ibge',
+            { ibge: Number(m[1]) }, true);
     }
 
     res.writeHead(404);

@@ -39,7 +39,6 @@ LEFT JOIN Municipios m ON m.id_estado = e.id_estado
 GROUP BY e.sigla
 ORDER BY qtd DESC;
 
--- === Consultas com as novas tabelas ===
 
 -- 1. Regiões com área territorial e quantidade de estados cadastrados
 SELECT r.nome, r.sigla, r.area_km2, r.qtd_estados,

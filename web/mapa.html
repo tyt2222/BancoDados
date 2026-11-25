@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa do desemprego - municipios do Brasil</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+  #mapa { position: absolute; inset: 0; background: #e6edf3; }
+  .caixa { position: absolute; z-index: 1000; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.3); padding: 12px 14px; font-size: 14px; }
+  #topo { top: 12px; left: 56px; }
+  #topo button { margin-right: 8px; padding: 4px 10px; cursor: pointer; }
+  #painel { top: 12px; right: 12px; width: 280px; display: none; }
+  #painel h2 { margin: 0 0 2px; font-size: 18px; }
+  #painel .sub { color: #666; margin-bottom: 10px; }
+  #painel dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 4px 12px; }
+  #painel dt { color: #555; } #painel dd { margin: 0; text-align: right; font-weight: 600; }
+  #legenda { bottom: 24px; left: 12px; width: 220px; }
+  #barra { height: 10px; border-radius: 5px; background: linear-gradient(90deg, hsl(120,70%,45%), hsl(60,70%,50%), hsl(0,75%,50%)); margin: 6px 0 2px; }
+  #escala { display: flex; justify-content: space-between; font-size: 12px; color: #444; }
+  #erro { bottom: 24px; right: 60px; background: #fde8e8; color: #8a1c1c; display: none; max-width: 320px; }
+</style>
+</head>
+<body>
+<div id="mapa"></div>
+
+<div id="topo" class="caixa">
+  <button id="voltar" style="display:none">&larr; Brasil</button>
+  <strong id="titulo">Taxa de desemprego por estado</strong>
+</div>
+
+<div id="painel" class="caixa">
+  <h2 id="p-nome"></h2>
+  <div class="sub" id="p-sub"></div>
+  <dl id="p-dados"></dl>
+</div>
+
+<div id="legenda" class="caixa">
+  <div>Taxa de desemprego (%)</div>
+  <div id="barra"></div>
+  <div id="escala"><span id="l-min"></span><span id="l-max"></span></div>
+</div>
+
+<div id="erro" class="caixa"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// codigo IBGE da UF -> sigla (as malhas do IBGE usam o codigo, o banco usa a sigla)
+const UF_POR_COD = {11:'RO',12:'AC',13:'AM',14:'RR',15:'PA',16:'AP',17:'TO',21:'MA',22:'PI',23:'CE',24:'RN',
+  25:'PB',26:'PE',27:'AL',28:'SE',29:'BA',31:'MG',32:'ES',33:'RJ',35:'SP',41:'PR',42:'SC',43:'RS',
+  50:'MS',51:'MT',52:'GO',53:'DF'};
+const IBGE = 'https://servicodados.ibge.gov.br/api/v4/malhas';
+const QS = 'formato=application/vnd.geo+json&qualidade=minima';
+const CENTRO = [-14.2, -51.9];
+
+let map, camada, nivel = 'BR', dados = {}, faixa = { min: 0, max: 1 }, selecionada = null;
+
+const $ = id => document.getElementById(id);
+const fmt = (n, d = 0) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+function mostrarErro(msg) { const e = $('erro'); e.textContent = msg; e.style.display = 'block'; }
+async function getJSON(url) {
+  let r;
+  try { r = await fetch(url); }
+  catch (e) {
+    throw new Error('Nao consegui acessar ' + url +
+      (location.protocol === 'file:' ? ' | abra pelo servidor: http://localhost:3000/mapa' : ''));
+  }
+  if (!r.ok) throw new Error('Falha ao buscar ' + url + ' (' + r.status + ')');
+  return r.json();
+}
+
+// verde (baixo) -> amarelo -> vermelho (alto)
+function cor(taxa) {
+  if (taxa == null) return '#cccccc';
+  const t = faixa.max > faixa.min ? (taxa - faixa.min) / (faixa.max - faixa.min) : 0;
+  return 'hsl(' + Math.round(120 * (1 - Math.max(0, Math.min(1, t)))) + ',70%,48%)';
+}
+
+// chave que liga o desenho (IBGE) ao dado (Oracle): codarea == codigo_ibge (municipio) ou codigo da UF
+function chave(feature) {
+  const cod = Number(feature.properties.codarea);
+  return nivel === 'BR' ? UF_POR_COD[cod] : cod;
+}
+
+function estilo(f) {
+  const sel = selecionada === chave(f);
+  const d = dados[chave(f)];
+  return { fillColor: cor(d && d.taxa), fillOpacity: 0.75, color: '#ffffff', weight: sel ? 3 : 0.6 };
+}
+
+function definirFaixa(valores) {
+  faixa = { min: Math.min(...valores), max: Math.max(...valores) };
+  $('l-min').textContent = fmt(faixa.min, 1) + '%';
+  $('l-max').textContent = fmt(faixa.max, 1) + '%';
+}
+
+function desenhar(geo) {
+  if (camada) map.removeLayer(camada);
+  camada = L.geoJSON(geo, {
+    style: estilo,
+    onEachFeature: (f, layer) => layer.on({
+      mouseover: () => layer.setStyle({ weight: 2.5, fillOpacity: 0.95 }),
+      mouseout: () => camada.resetStyle(layer),
+      click: () => aoClicar(chave(f))
+    })
+  }).addTo(map);
+}
+
+function aoClicar(k) {
+  if (nivel === 'BR') { if (k) carregarUF(k); return; }
+  selecionada = k; camada.setStyle(estilo);
+  abrirMunicipio(k);
+}
+
+async function carregarBrasil() {
+  nivel = 'BR'; selecionada = null;
+  $('painel').style.display = 'none'; $('voltar').style.display = 'none';
+  $('titulo').textContent = 'Taxa de desemprego por estado (media dos municipios)';
+  try {
+    const [estados, geo] = await Promise.all([
+      getJSON('/api/mapa/estados'),
+      getJSON(IBGE + '/paises/BR?intrarregiao=UF&' + QS)
+    ]);
+    dados = {};
+    estados.forEach(e => dados[e.sigla] = { nome: e.nome, taxa: e.taxa_media });
+    definirFaixa(estados.map(e => e.taxa_media));
+    desenhar(geo);
+    map.setView(CENTRO, 4);
+  } catch (e) { mostrarErro(e.message); }
+}
+
+async function carregarUF(sigla) {
+  nivel = 'UF'; selecionada = null;
+  $('painel').style.display = 'none'; $('voltar').style.display = 'inline-block';
+  $('titulo').textContent = 'Municipios de ' + sigla;
+  try {
+    const [muns, geo] = await Promise.all([
+      getJSON('/api/mapa/uf/' + sigla),
+      getJSON(IBGE + '/estados/' + sigla + '?intrarregiao=municipio&' + QS)
+    ]);
+    dados = {};
+    muns.forEach(m => dados[m.codigo_ibge] = { nome: m.nome, taxa: m.taxa_desemprego });
+    definirFaixa(muns.map(m => m.taxa_desemprego));
+    desenhar(geo);
+    map.fitBounds(camada.getBounds());
+  } catch (e) { mostrarErro(e.message); }
+}
+
+async function abrirMunicipio(ibge) {
+  try {
+    const m = await getJSON('/api/mapa/municipio/' + ibge);
+    $('p-nome').textContent = m.nome;
+    $('p-sub').textContent = m.uf + ' - Regiao ' + m.regiao;
+    const linhas = [
+      ['Taxa de desemprego', fmt(m.taxa_desemprego, 2) + '%'],
+      ['Media do estado', fmt(m.media_uf, 2) + '%'],
+      ['Media dos municipios do pais', fmt(m.media_br, 2) + '%'],
+      ['Posicao no estado', m.posicao_uf + 'o de ' + m.total_uf],
+      ['Renda media', 'R$ ' + fmt(m.renda_media, 2)],
+      ['Populacao', fmt(m.populacao)],
+      ['Codigo IBGE', m.codigo_ibge]
+    ];
+    const dl = $('p-dados'); dl.textContent = '';
+    linhas.forEach(([k, v]) => {
+      const dt = document.createElement('dt'), dd = document.createElement('dd');
+      dt.textContent = k; dd.textContent = v; dl.append(dt, dd);
+    });
+    $('painel').style.display = 'block';
+  } catch (e) { mostrarErro(e.message); }
+}
+
+map = L.map('mapa', { center: CENTRO, zoom: 4, minZoom: 3 });
+// Mapa de fundo (ruas): DESLIGADO por padrao pra nao depender de servidor de tiles.
+// Mude pra true se quiser; o OpenStreetMap bloqueia (403) quando a pagina e aberta por file://
+const FUNDO_RUAS = false;
+if (FUNDO_RUAS) {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18, subdomains: 'abcd',
+    attribution: '&copy; OpenStreetMap &copy; CARTO | Malhas: IBGE'
+  }).addTo(map);
+} else {
+  map.attributionControl.addAttribution('Malhas: IBGE');
+}
+$('voltar').onclick = carregarBrasil;
+carregarBrasil();
+</script>
+</body>
+</html>

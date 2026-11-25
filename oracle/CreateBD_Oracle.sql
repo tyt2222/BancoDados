@@ -27,6 +27,7 @@ CREATE TABLE Regioes (
     UNIQUE (nome)
 );
 
+-- registra os usuarios do sistema
 CREATE TABLE Analistas (
     id_analista NUMBER(4) PRIMARY KEY,
     nome VARCHAR2(60) NOT NULL,
@@ -68,6 +69,7 @@ CREATE TABLE Municipios (
     UNIQUE (codigo_ibge)
 );
 
+-- essa tabela funciona como um log para registrar alteracoes nos dados
 CREATE TABLE Auditoria (
     id_auditoria NUMBER(8) PRIMARY KEY,
     codigo_ibge NUMBER(7) NOT NULL,
@@ -104,6 +106,8 @@ CREATE TABLE Historico_Desemprego (
     UNIQUE (id_estado, ano)
 );
 
+
+-- indexes ajudam a acelerar as pesquisas atraves da criacao de indices de buscas
 CREATE INDEX idx_municipio_uf ON Municipios(uf);
 CREATE INDEX idx_municipio_taxa ON Municipios(taxa_desemprego);
 CREATE INDEX idx_estado_regiao ON Estados(regiao);
