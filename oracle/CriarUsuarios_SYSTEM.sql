@@ -1,3 +1,5 @@
+-- Script de criacao de usuarios e perfis de acesso (Executar conectado como SYSTEM)
+
 CREATE USER IBGE_DESEMPREGO IDENTIFIED BY senha123
     DEFAULT TABLESPACE USERS
     TEMPORARY TABLESPACE TEMP
